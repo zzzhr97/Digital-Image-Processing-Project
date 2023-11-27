@@ -16,6 +16,24 @@ TASK_NAME = {
     2: 'Hypertensive Retinopathy Classification',
 }
 
+def load_data(args, seed):
+    """
+    load the data.
+
+    Returns: dataset, train data, validation data.
+    """
+    transform = transform_method(method=args.transform_method)
+    dataset = hyper_dataset(
+        args.data_dir, 
+        task=args.task, 
+        n_valid=args.n_valid, 
+        is_shuffle=args.is_shuffle, 
+        seed=seed,
+        transform=transform
+    )
+    train_data, valid_data = dataset.get_data()
+    return dataset, train_data, valid_data
+
 class hyper_dataset(Dataset):
     def __init__(self, data_dir, task=1, n_valid=64, is_shuffle=False, seed=123, transform=None):
         """

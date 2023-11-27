@@ -4,11 +4,16 @@ import torch
 
 class transform_method:
     def __init__(self, method=1):
-        self.transform = transforms.Compose([
+        self.transform1 = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize((512, 512)),
             transforms.ToTensor(),
             transforms.Normalize((0.5,), (0.5,))
+        ])
+        self.transform2 = transforms.Compose([transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
         self.method = method
 
@@ -28,6 +33,5 @@ class transform_method:
 
         # normalize
         #image = image / 255.0
-        #image = (image - 0.5) / 0.5
 
         return image

@@ -28,11 +28,19 @@ class TestNet(nn.Module):
             nn.ReLU(),          
             nn.Linear(320, 1)                                
         )
+        self.simple_layer = nn.Sequential(
+            nn.MaxPool2d(kernel_size=2),                            # (3, 512, 512) -> (3, 256, 256)
+            nn.MaxPool2d(kernel_size=2),                            # (3, 256, 256) -> (3, 128, 128)
+            nn.MaxPool2d(kernel_size=2),                            # (3, 128, 128) -> (3, 64, 64)
+            nn.Flatten(),
+            nn.Linear(3*64*64, 32),                                 
+            nn.ReLU(),
+            nn.Linear(32, 1)
+        )
 
     def forward(self, x):
-        assert x.shape == (x.shape[0], 3, 512, 512), x.shape
         x = self.conv_layer(x)
-        assert x.shape == (x.shape[0], 8, 32, 32), x.shape
         x = x.view(x.shape[0], -1)
         x = self.linear_layer(x)
+        #x = self.simple_layer(x)
         return x

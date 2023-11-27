@@ -1,49 +1,13 @@
 import os
-from tqdm import tqdm
 import torch
 import torch.nn.functional as F
 import argparse
-import random
 import numpy as np
 import time
-import json
-import pandas as pd
-import matplotlib.pyplot as plt
 
-from transform import transform_method
-from data import hyper_dataset
+from data import load_data
 import network
-
-def set_seed(seed):
-    """set random seed."""
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)    # numpy 
-    random.seed(seed)      
-
-    # ensure reproducibility
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
-
-def load_data(args, seed):
-    """
-    load the data.
-
-    :return: dataset, train data, validation data.
-    """
-    transform = transform_method(method=args.transform_method)
-    dataset = hyper_dataset(
-        args.data_dir, 
-        task=args.task, 
-        n_valid=args.n_valid, 
-        is_shuffle=args.is_shuffle, 
-        seed=seed,
-        transform=transform
-    )
-    train_data, valid_data = dataset.get_data()
-    return dataset, train_data, valid_data
+import utils
 
 def eval(net, train_data, valid_data, threshold, loss_fn, device):
     """
@@ -75,7 +39,6 @@ def eval_scores(net, data, threshold, loss_fn, device):
     net.eval()
     with torch.no_grad():
         TP, TN, FP, FN = 0, 0, 0, 0
-        scores = {'Kappa': 0, 'F1': 0, 'Specificity': 0}
         losses = []
         for sample in data:
             image = sample['image'].unsqueeze(0).to(device, torch.float)
@@ -83,104 +46,30 @@ def eval_scores(net, data, threshold, loss_fn, device):
             output = net(image).view(-1, 1).cpu()
             pr = F.sigmoid(output).item()
 
+            #utils.show_image(sample['image'], sample['label'], sample['name'])
+
             # calculate loss
             loss = loss_fn(output, label.view(-1, 1).float())
             losses.append(loss.item())
 
             label_pred = int(pr >= threshold)
+            
             TP += int(label_pred and label.item() == 1)
             FP += int(label_pred and label.item() == 0)
             TN += int(not label_pred and label.item() == 0)
             FN += int(not label_pred and label.item() == 1)
 
-        # loss
-        scores['Loss'] = sum(losses) / len(losses)
-
-        # kappa
-        po = (TP + TN) * 1.0 / (TP + TN + FP + FN)
-        pe = ((TP + FP) * (TP + FN) + (TN + FP) * (TN + FN)) * 1.0 / (TP + TN + FP + FN) ** 2
-        scores['Kappa'] = (po - pe) / (1 - pe)
-
-        # F1 score
-        precision = TP * 1.0 / (TP + FP)
-        recall = TP * 1.0 / (TP + FN)
-        scores['F1'] = 2 * precision * recall / (precision + recall)
-
-        # specificity
-        scores['Specificity'] = TN * 1.0 / (TN + FP)
-
-        # average score of the three
-        scores['Average'] = (scores['Kappa'] + scores['F1'] + scores['Specificity']) / 3
+        scores = utils.cal_scores(losses, TP, FP, TN, FN)
 
     net.train() 
     return scores
-
-def checkpoint(net, file_name, save_path, device):
-    """save the model weights to a file."""
-    print("\tSaving checkpoint...")
-    net.cpu()       # move to cpu
-    ckpt_dict = net.state_dict()
-    torch.save(ckpt_dict, os.path.join(save_path, file_name))
-    net.to(device)  # move back to the device
-
-    print(f'\tCheckpoint saved.')
-    print(f'\tFile name: {file_name}')
-
-def load_checkpoint(net, file_name, load_path, device):
-    """load the model weights from a file."""
-    print("\tLoading checkpoint...")
-    ckpt_dict = torch.load(os.path.join(load_path, file_name), map_location=device)
-    net.load_state_dict(ckpt_dict)
-
-    print(f'\tCheckpoint loaded.')
-    print(f'\tFile name: {file_name}')
-
-def save_results(results, file_name, save_path):
-    """save the results to a file."""
-    print("\tSaving results...")
-    #with open(os.path.join(save_path, file_name), 'w') as f:
-        #json.dump(results, f, indent=4)
-
-    df = pd.json_normalize(results) # convert results to a dataframe
-    df.to_csv(os.path.join(save_path, file_name), index=False)
-
-    print(f'\tResults saved.')
-    print(f'\tFile name: {file_name}')
-
-def visualize_results(results, best_valid_result):
-    """visualize the results."""
-    results = results[:-1]  # remove the last element {'best_threshold': best threshold in validation set}
-    counter = [i['epoch'] for i in results]
-    train_losses = [i['train_score']['Loss'] for i in results]
-    valid_losses = [i['valid_score']['Loss'] for i in results]
-    train_avg_score = [i['train_score']['Average'] for i in results]
-    valid_avg_score = [i['valid_score']['Average'] for i in results]
-
-    plt.subplot(1, 2, 1)
-    plt.plot(counter, train_losses, color='red')
-    plt.plot(counter, valid_losses, color='green')
-    plt.title("Loss")
-    plt.legend(['Train', 'Validation'], loc='upper right')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-
-    plt.subplot(1, 2, 2)
-    plt.plot(counter, train_avg_score, color='red')
-    plt.plot(counter, valid_avg_score, color='green')
-    plt.title("Average Score")
-    plt.legend(['Train', 'Validation'], loc='upper right')
-    plt.xlabel('Epoch')
-    plt.ylabel('Average Score')
-
-    plt.tight_layout()
-    plt.show()
 
 def search_threshold(args, seed, loss_fn, load_path, data, device):
     """search the best threshold in validation set for classification."""
     print('Searching the best threshold in validation set for classification...')
     net = getattr(network, args.model)()
     net = net.to(device)
-    load_checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best.pth', load_path, device)
+    utils.load_checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best.pth', load_path, device)
     net.eval()
 
     with torch.no_grad():
@@ -188,7 +77,7 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
 
         best_threshold = 0.5
         best_scores = valid_scores
-        th_range = torch.arange(0.4, 0.6, 0.01)
+        th_range = torch.arange(0.4, 0.6, 0.01).tolist()
         for threshold in th_range:
             if threshold == 0.5:
                 continue
@@ -201,11 +90,12 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
         print(f'\tBest valid score {best_scores}')
         print(f'\tBest threshold {best_threshold}')
 
-    return best_threshold.item()
+    assert type(best_threshold) == float, f'type of best threshold is {type(best_threshold)}, but should be float'
+    return best_threshold
 
 def train(args, seed=123):
     # set seed
-    set_seed(seed)
+    utils.set_seed(seed)
 
     # load data
     dataset, train_data, valid_data = load_data(args, seed)
@@ -264,6 +154,7 @@ def train(args, seed=123):
         n_batches += 1
 
     # training for each epoch
+    net.train()
     for epoch in range(args.n_epochs):
         
         # learning rate decay
@@ -322,8 +213,8 @@ def train(args, seed=123):
         if (epoch + 1) % args.eval_every == 0:
             eval_start_time = time.time()
             train_scores, valid_scores = eval(net, train_data, valid_data, args.threshold, loss_fn, device)
-            print(f'Epoch {epoch + 1}',
-                f'|| train score: {train_scores["Average"]:.4f}',
+            print(f'[ Epoch {epoch + 1:3} ]',
+                f'train score: {train_scores["Average"]:.4f}',
                 f'|| valid score: {valid_scores["Average"]:.4f}',
                 f'|| train loss: {train_scores["Loss"]:.4f}',
                 f'|| valid loss: {valid_scores["Loss"]:.4f}',
@@ -334,7 +225,7 @@ def train(args, seed=123):
             # save the best network weights
             if valid_scores["Loss"] < best_valid_result["Loss"]:
                 best_valid_result = valid_scores
-                checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best.pth', ckpt_save_path, device)
+                utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best.pth', ckpt_save_path, device)
 
             # save the results
             results.append({
@@ -345,7 +236,7 @@ def train(args, seed=123):
 
         # save the network weights
         if (epoch + 1) % args.ckpt_every == 0:
-            checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_epoch{epoch + 1}.pth', ckpt_save_path, device)
+            utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_epoch{epoch + 1}.pth', ckpt_save_path, device)
 
     # training finished
     print(f'Best valid score: {best_valid_result}')
@@ -359,10 +250,10 @@ def train(args, seed=123):
     # format: 
     #   the last element is {'best_threshold': best threshold in validation set}
     #   the other elements are {'epoch': epoch, 'train_score': train scores list, 'valid_score': valid scores list}
-    save_results(results, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}.csv', result_save_path)
+    utils.save_results(results, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}.csv', result_save_path)
 
     # visualize the results
-    visualize_results(results, best_valid_result)
+    utils.visualize_results(results, best_valid_result)
 
 def main(args):
     for seed in args.seed:

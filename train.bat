@@ -9,8 +9,8 @@ python train.py ^
 --batch_size 4 ^
 --n_epochs 5 ^
 --lr 0.0001 ^
---lr_decay_epochs 15 ^
---lr_decay_values 0.00001 ^
+--lr_decay_epochs 15 30 50 ^
+--lr_decay_values 0.0001 0.00002 0.00001 ^
 --weight_decay 0.0001 ^
 --is_shuffle True ^
 --optimizer adam ^
@@ -22,4 +22,4 @@ python train.py ^
 --result_dir results ^
 --ckpt_every 10 ^
 --eval_every 1 ^
---print_every 2 ^
+--print_every 5 ^
