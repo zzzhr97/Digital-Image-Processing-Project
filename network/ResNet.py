@@ -194,18 +194,18 @@ class ResNet(nn.Module):
 # ResNet()中block参数对应的位置是BasicBlock或Bottleneck
 # ResNet()中blocks_num[0-3]对应[3, 4, 6, 3]，表示残差模块中的残差数
 # 34层的resnet
-def resnet34(num_classes=1000, include_top=True):
+def resnet34(num_classes=1, include_top=True):
     # https://download.pytorch.org/models/resnet34-333f7ec4.pth
     return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes, include_top=include_top)
  
  
 # 50层的resnet
-def resnet50(num_classes=1000, include_top=True):
+def resnet50(num_classes=1, include_top=True):
     # https://download.pytorch.org/models/resnet50-19c8e357.pth
     return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes, include_top=include_top)
  
  
 # 101层的resnet
-def resnet101(num_classes=1000, include_top=True):
+def resnet101(num_classes=1, include_top=True):
     # https://download.pytorch.org/models/resnet101-5d3b4d8f.pth
     return ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes, include_top=include_top)
