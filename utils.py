@@ -75,12 +75,23 @@ def show_image(image, label=None, name=None):
     plt.imshow(img_array)
     plt.show()
 
-def save_results(results, file_name, save_path):
+def save_results(args, results, file_name, save_path):
     """save the results to a file."""
     #with open(os.path.join(save_path, file_name), 'w') as f:
         #json.dump(results, f, indent=4)
 
-    df = pd.json_normalize(results) # convert results to a dataframe
+    total_results = []
+
+    # save args
+    for key, value in vars(args).items():
+        total_results.append({'param': key, 'value': value})
+
+    # add results and best threshold to total_results
+    total_results = results[:-1] + total_results
+    if args.is_search:
+        total_results += [results[-1]]
+
+    df = pd.json_normalize(total_results) # convert results to a dataframe
     df.to_csv(os.path.join(save_path, file_name), index=False)
 
     print(f'\tResults saved to {file_name}')

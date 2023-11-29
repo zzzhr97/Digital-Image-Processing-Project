@@ -26,12 +26,15 @@ class transform_method:
 
     def method_1(self, image):
         # resize image
-        image = cv2.resize(image, (512, 512))
+        image = cv2.resize(image, (512, 512)) # (800, 800, 3) -> (512, 512, 3)
 
         # convert to tensor
         image = torch.from_numpy(image).permute(2, 0, 1)    # (3, 512, 512)
 
         # normalize
-        #image = image / 255.0
+        #image = image * 1.0 / 255
 
         return image
+    
+    def method_2(self, image):
+        pass

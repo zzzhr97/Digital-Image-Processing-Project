@@ -19,6 +19,7 @@ python train.py \
 
 --threshold 0.5 \
 --model TestNet \
+--is_search False \
 
 --ckpt_dir checkpoints \
 --result_dir results \

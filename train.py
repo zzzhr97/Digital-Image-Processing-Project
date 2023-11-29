@@ -53,7 +53,7 @@ def eval_scores(net, data, threshold, loss_fn, device):
             losses.append(loss.item())
 
             label_pred = int(pr >= threshold)
-            
+
             TP += int(label_pred and label.item() == 1)
             FP += int(label_pred and label.item() == 0)
             TN += int(not label_pred and label.item() == 0)
@@ -87,8 +87,7 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
                 best_scores = new_scores
                 best_threshold = threshold
 
-        print(f'\tBest valid score {best_scores}')
-        print(f'\tBest threshold {best_threshold}')
+        print(f'========(Please ignore this line)Best valid score {best_scores} in threshold {best_threshold}')
 
     assert type(best_threshold) == float, f'type of best threshold is {type(best_threshold)}, but should be float'
     return best_threshold
@@ -98,8 +97,10 @@ def train(args, seed=123):
     utils.set_seed(seed)
 
     # load data
+    print("Loading data...", end=' ')
     dataset, train_data, valid_data = load_data(args, seed)
-    print(f'# of training data: {len(train_data)} \t# of validation data: {len(valid_data)}')
+    print("Done.")
+    print(f'number of training data: {len(train_data)} \tnumber of validation data: {len(valid_data)}')
 
     # path to save checkpoints
     ckpt_save_path = os.path.join(args.ckpt_dir, f'task-{args.task}', f'{args.model}')
@@ -112,7 +113,7 @@ def train(args, seed=123):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else:
         device = torch.device('cpu')
-    print(f'device: {device}')
+    print(f'Device: {device}')
 
     # init model
     # example: if args.model == 'ResNet34', then net = network.ResNet34()
@@ -123,7 +124,7 @@ def train(args, seed=123):
     # this is used to balance the loss function
     n_positive = sum([x['label'] == 1 for x in train_data])
     n_negative = len(train_data) - n_positive
-    print(f'\t# of positive labels: {n_positive}\t# of negative labels: {n_negative}')
+    print(f'\tnumber of positive labels: {n_positive}\tnumber of negative labels: {n_negative}')
     pos_weight = torch.tensor(n_negative * 1.0 / n_positive)
 
     # loss function: sigmoid + BCELoss
@@ -154,6 +155,7 @@ def train(args, seed=123):
         n_batches += 1
 
     # training for each epoch
+    print("Begin training.")
     net.train()
     for epoch in range(args.n_epochs):
         
@@ -218,7 +220,7 @@ def train(args, seed=123):
                 f'|| valid score: {valid_scores["Average"]:.4f}',
                 f'|| train loss: {train_scores["Loss"]:.4f}',
                 f'|| valid loss: {valid_scores["Loss"]:.4f}',
-                f'|| time: {time.time() - start_time:.2f}s',
+                f'|| time: {time.time() - start_time:4f}s',
                 f'|| eval time: {time.time() - eval_start_time:.2f}s'
             )
             
@@ -243,14 +245,16 @@ def train(args, seed=123):
     print(f'Total time: {time.time() - start_time:.2f}s')
 
     # search the best threshold in validation set for classification
-    best_threshold = search_threshold(args, seed, loss_fn, ckpt_save_path, valid_data, device)
-    results.append({'best_threshold': best_threshold})
+    if args.is_search:
+        print(args.is_search)
+        best_threshold = search_threshold(args, seed, loss_fn, ckpt_save_path, valid_data, device)
+        results.append({'best_threshold': best_threshold})
 
     # save the results
     # format: 
     #   the last element is {'best_threshold': best threshold in validation set}
     #   the other elements are {'epoch': epoch, 'train_score': train scores list, 'valid_score': valid scores list}
-    utils.save_results(results, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}.csv', result_save_path)
+    utils.save_results(args, results, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}.csv', result_save_path)
 
     # visualize the results
     utils.visualize_results(results, best_valid_result)
@@ -284,7 +288,8 @@ if __name__ == '__main__':
 
     # model parameters
     parser.add_argument('--threshold', type=float, default=0.5, help='threshold for classification')
-    parser.add_argument('--model', choices=['ResNet34', 'ResNet50', 'ResNet152', 'TestNet'], default='ResNet34', help='model name')
+    parser.add_argument('--model', type=str, default='ResNet34', help='model name')
+    parser.add_argument('--is_search', type=str, choices=['0', '1'], default=0, help='whether to search the best threshold')
 
     # logging parameters
     parser.add_argument('--ckpt_dir', type=str, default='checkpoints', help='path to saved checkpoints')
@@ -295,5 +300,6 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     args = parser.parse_args()
+    args.is_search = True if args.is_search == '1' else False
     print("-------------------BEGIN-------------------")
     main(args)
