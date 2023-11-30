@@ -16,13 +16,16 @@ TASK_NAME = {
     2: 'Hypertensive Retinopathy Classification',
 }
 
-def load_data(args, seed):
+def load_data(args, transform_method_origin, seed):
     """
     load the data.
 
+    train/validation data format: 
+        [idx: {'image': image, 'label': label, 'name': name}]
+
     Returns: dataset, train data, validation data.
     """
-    transform = transform_method(method=args.transform_method)
+    transform = transform_method(method=transform_method_origin)
     dataset = hyper_dataset(
         args.data_dir, 
         task=args.task, 

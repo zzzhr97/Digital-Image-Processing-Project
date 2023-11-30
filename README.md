@@ -25,3 +25,4 @@
 - *v0.2*: 完成数据读取，数据预处理，训练功能
   - *v0.2.1*: 完善代码并添加`utils.py`文件。
 - *v0.3*: 添加`DenseNet`和`ResNet`网络代码，添加`is_search`命令行参数，完善代码。同时删除了github上的results文件夹，改为本地保存。
+  - *v0.3.1*: 添加`transform_method_origin`和`transform_method_epoch`命令行参数，用于在训练时引入数据增强功能。修复一些小bug，并将最终结果保存成图片文件`results.png`，方便查看训练结果。

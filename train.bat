@@ -5,13 +5,14 @@ python train.py ^
 --data_dir dataset ^
     ^
 --n_valid 64 ^
---transform_method 1 ^
+--transform_method_origin 1 ^
+--transform_method_epoch 2 ^
 --batch_size 4 ^
---n_epochs 2 ^
---lr 0.0005 ^
---lr_decay_epochs 100 30 50 ^
+--n_epochs 5 ^
+--lr 0.0001 ^
+--lr_decay_epochs 15 30 50 ^
 --lr_decay_values 0.0001 0.00002 0.00001 ^
---weight_decay 0.001 ^
+--weight_decay 0.0001 ^
 --is_shuffle True ^
 --optimizer adam ^
     ^

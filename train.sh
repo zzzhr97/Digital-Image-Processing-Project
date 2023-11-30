@@ -7,7 +7,8 @@ python train.py \
 --data_dir dataset \
 
 --n_valid 64 \
---transform_method 1 \
+--transform_method_origin 1 \
+--transform_method_epoch 2 \
 --batch_size 4 \
 --n_epochs 5 \
 --lr 0.0001 \

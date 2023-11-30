@@ -5,6 +5,8 @@ import random
 import matplotlib.pyplot as plt
 import pandas as pd
 
+import transform as tr
+
 def set_seed(seed):
     """set random seed."""
     torch.manual_seed(seed)
@@ -60,13 +62,17 @@ def visualize_results(results, best_valid_result):
     plt.ylabel('Average Score')
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig('./results.png')
+    print(f'\tImage results saved to results.png')
 
 def show_image(image, label=None, name=None):
     """show an image."""
     # 转换tensor为NumPy数组
     img_array = image.permute(1, 2, 0).numpy()
     img_array = img_array[:, :, [2, 1, 0]]  # BRG --> RGB
+
+    if img_array.max() > 1:
+        img_array = img_array * 1.0 / 255
 
     # 添加文本注释
     text_info = f'Name: {name}\nShape: {image.shape}\nLabel: {label}'
@@ -87,9 +93,10 @@ def save_results(args, results, file_name, save_path):
         total_results.append({'param': key, 'value': value})
 
     # add results and best threshold to total_results
-    total_results = results[:-1] + total_results
     if args.is_search:
-        total_results += [results[-1]]
+        total_results = results[:-1] + total_results + [results[-1]]
+    else:
+        total_results = results + total_results
 
     df = pd.json_normalize(total_results) # convert results to a dataframe
     df.to_csv(os.path.join(save_path, file_name), index=False)
@@ -108,20 +115,40 @@ def cal_scores(losses, TP, FP, TN, FN):
     # loss
     scores['Loss'] = sum(losses) / len(losses)
 
+    TP = TP + 1e-10
+    FP = FP + 1e-10
+    TN = TN + 1e-10
+    FN = FN + 1e-10
+
     # kappa
-    po = (TP + TN) * 1.0 / (TP + TN + FP + FN)
-    pe = ((TP + FP) * (TP + FN) + (TN + FP) * (TN + FN)) * 1.0 / (TP + TN + FP + FN) ** 2
+    po = (TP + TN)  / (TP + TN + FP + FN)
+    pe = ((TP + FP) * (TP + FN) + (TN + FP) * (TN + FN)) / (TP + TN + FP + FN) ** 2
     scores['Kappa'] = (po - pe) / (1 - pe)
 
     # F1 score
-    precision = TP * 1.0 / (TP + FP + 1e-10)
-    recall = TP * 1.0 / (TP + FN + 1e-10)
+    precision = TP / (TP + FP)
+    recall = TP / (TP + FN)
     scores['F1'] = 2 * precision * recall / (precision + recall + 1e-10)
 
     # specificity
-    scores['Specificity'] = TN * 1.0 / (TN + FP + 1e-10)
+    scores['Specificity'] = TN / (TN + FP)
 
     # average score of the three
     scores['Average'] = (scores['Kappa'] + scores['F1'] + scores['Specificity']) / 3
 
     return scores
+
+def transform_data(data, transform_method_epoch):
+    """
+    Transform the data.
+
+    :param data_list (torch.tensor): Input batch data. Shape: (batch_size, 3, x, x)
+    :param transform_method: number of transform method.
+    :return: Transformed data.
+    """
+    if transform_method_epoch:
+        transform = tr.transform_method(method=transform_method_epoch)
+        for i in range(len(data)):
+            data[i] = transform(data[i])
+
+    return data

@@ -6,6 +6,7 @@ import numpy as np
 import time
 
 from data import load_data
+import transform
 import network
 import utils
 
@@ -24,9 +25,9 @@ def eval(net, train_data, valid_data, threshold, loss_fn, device):
 
     Returns: train scores, validation scores
     """
-    train_scores = eval_scores(net, train_data, threshold, loss_fn, device)
-    valid_scores = eval_scores(net, valid_data, threshold, loss_fn, device)
-    return train_scores, valid_scores
+    train_scores, train_TFPN = eval_scores(net, train_data, threshold, loss_fn, device)
+    valid_scores, valid_TFPN = eval_scores(net, valid_data, threshold, loss_fn, device)
+    return train_scores, train_TFPN, valid_scores, valid_TFPN
 
 def eval_scores(net, data, threshold, loss_fn, device):
     """
@@ -60,9 +61,10 @@ def eval_scores(net, data, threshold, loss_fn, device):
             FN += int(not label_pred and label.item() == 1)
 
         scores = utils.cal_scores(losses, TP, FP, TN, FN)
+        TFPN = {'TP': TP, 'FP': FP, 'TN': TN, 'FN': FN}
 
     net.train() 
-    return scores
+    return scores, TFPN
 
 def search_threshold(args, seed, loss_fn, load_path, data, device):
     """search the best threshold in validation set for classification."""
@@ -73,7 +75,7 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
     net.eval()
 
     with torch.no_grad():
-        _, valid_scores = eval(net, None, data, args.threshold, loss_fn, device)
+        _, _, valid_scores, _ = eval(net, None, data, args.threshold, loss_fn, device)
 
         best_threshold = 0.5
         best_scores = valid_scores
@@ -81,7 +83,7 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
         for threshold in th_range:
             if threshold == 0.5:
                 continue
-            _, new_scores = eval(net, None, data, threshold, loss_fn, device)
+            _, _, new_scores, _ = eval(net, None, data, threshold, loss_fn, device)
 
             if new_scores["Average"] > best_scores["Average"]:
                 best_scores = new_scores
@@ -98,7 +100,9 @@ def train(args, seed=123):
 
     # load data
     print("Loading data...", end=' ')
-    dataset, train_data, valid_data = load_data(args, seed)
+    dataset, train_data, valid_data = load_data(args, 
+        transform_method_origin=args.transform_method_origin, 
+        seed=seed)
     print("Done.")
     print(f'number of training data: {len(train_data)} \tnumber of validation data: {len(valid_data)}')
 
@@ -167,7 +171,7 @@ def train(args, seed=123):
 
         # shuffle the training data for each epoch
         permutation = np.random.permutation(len(train_data))
-        train_data = [train_data[i] for i in permutation]
+        train_data_shuffled = [train_data[i] for i in permutation]
 
         # training for each batch
         for batch_idx in range(n_batches):
@@ -179,7 +183,7 @@ def train(args, seed=123):
                 end_idx = len(train_data)
 
             # get the training data for this batch
-            batch_data = train_data[start_idx:end_idx]
+            batch_data = train_data_shuffled[start_idx:end_idx]
             images = torch.stack([x['image'] for x in batch_data])
             labels = torch.tensor([x['label'] for x in batch_data])
 
@@ -191,6 +195,15 @@ def train(args, seed=123):
             # move data to device
             images = images.to(device, torch.float)
             labels = labels.to(device, torch.float)
+
+            #if batch_idx == 0: 
+                #utils.show_image(images[0].detach().cpu(), labels[0].detach().cpu(), batch_data[0]['name'])   
+
+            # implement transform_method_epoch
+            images = utils.transform_data(images, args.transform_method_epoch)
+
+            #if batch_idx == 0: 
+                #utils.show_image(images[0].detach().cpu(), labels[0].detach().cpu(), batch_data[0]['name'])   
 
             # forward pass
             output = net(images)
@@ -214,14 +227,16 @@ def train(args, seed=123):
         # evaluate the model on the validation set
         if (epoch + 1) % args.eval_every == 0:
             eval_start_time = time.time()
-            train_scores, valid_scores = eval(net, train_data, valid_data, args.threshold, loss_fn, device)
+            train_scores, train_TFPN, valid_scores, valid_TFPN = eval(net, train_data, valid_data, args.threshold, loss_fn, device)
             print(f'[ Epoch {epoch + 1:3} ]',
                 f'train score: {train_scores["Average"]:.4f}',
                 f'|| valid score: {valid_scores["Average"]:.4f}',
                 f'|| train loss: {train_scores["Loss"]:.4f}',
                 f'|| valid loss: {valid_scores["Loss"]:.4f}',
-                f'|| time: {time.time() - start_time:4f}s',
-                f'|| eval time: {time.time() - eval_start_time:.2f}s'
+                f'|| time: {time.time() - start_time:8.2f}s',
+                f'|| eval time: {time.time() - eval_start_time:4.2f}s\n',
+                f'             train TP/TN/FP/FN: {train_TFPN["TP"]:3}/{train_TFPN["TN"]:3}/{train_TFPN["FP"]:3}/{train_TFPN["FN"]:3}',
+                f'|| valid TP/TN/FP/FN: {valid_TFPN["TP"]:2}/{valid_TFPN["TN"]:2}/{valid_TFPN["FP"]:2}/{valid_TFPN["FN"]:2}',
             )
             
             # save the best network weights
@@ -274,7 +289,10 @@ if __name__ == '__main__':
 
     # optimization parameters
     parser.add_argument('--n_valid', type=int, default=64, help='number of validation images')
-    parser.add_argument('--transform_method', type=int, default=1, help='transform method number')
+    parser.add_argument('--transform_method_origin', type=int, default=1, 
+                        help='transform method number for each image while loading data')
+    parser.add_argument('--transform_method_epoch', type=int, default=2,
+                        help='transform method number for each image while in each epoch')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size')
     parser.add_argument('--n_epochs', type=int, default=100, help='number of epochs')
     parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
