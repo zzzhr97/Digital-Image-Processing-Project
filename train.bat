@@ -16,6 +16,7 @@ python train.py ^
 --is_shuffle True ^
 --optimizer adam ^
     ^
+--out_dim 1 ^
 --threshold 0.5 ^
 --model TestNet ^
 --is_search 0 ^
@@ -24,4 +25,4 @@ python train.py ^
 --result_dir results ^
 --ckpt_every 100 ^
 --eval_every 1 ^
---print_every 1000 ^
+--print_every 100 ^

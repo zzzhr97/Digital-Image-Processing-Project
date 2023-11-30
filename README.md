@@ -28,3 +28,4 @@
   - *v0.2.1*: 完善代码并添加`utils.py`文件。
 - *v0.3*: 添加`DenseNet`和`ResNet`网络代码，添加`is_search`命令行参数，完善代码。同时删除了github上的results文件夹，改为本地保存。
   - *v0.3.1*: 添加`transform_method_origin`和`transform_method_epoch`命令行参数，用于在训练时引入数据增强功能。修复一些小bug，并将最终结果保存成图片文件`results.png`，方便查看训练结果。此外，在训练时，不仅会打印`score`和`loss`，还会打印训练和验证集的`TP`，`TN`，`FP`，`FN`。
+  - *v0.3.2*: 添加`out_dim`命令行参数，用于控制输出大小，为1输出大小为`[batch_size, 1]`，为2输出大小为`[batch_size, 2]`。如果为1，使用神经网络输出值经过`sigmoid`所得作为正样本概率；如果为2，使用神经网络输出的两个值分别作为负样本、正样本概率。

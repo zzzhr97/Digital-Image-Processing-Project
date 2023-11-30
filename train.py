@@ -10,7 +10,7 @@ import transform
 import network
 import utils
 
-def eval(net, train_data, valid_data, threshold, loss_fn, device):
+def eval(net, train_data, valid_data, threshold, loss_fn, out_dim, device):
     """
     Evaluate the model on the training set and validation set.
     This will use Kappa, F1 score and Specificity.
@@ -25,11 +25,11 @@ def eval(net, train_data, valid_data, threshold, loss_fn, device):
 
     Returns: train scores, validation scores
     """
-    train_scores, train_TFPN = eval_scores(net, train_data, threshold, loss_fn, device)
-    valid_scores, valid_TFPN = eval_scores(net, valid_data, threshold, loss_fn, device)
+    train_scores, train_TFPN = eval_scores(net, train_data, threshold, loss_fn, out_dim, device)
+    valid_scores, valid_TFPN = eval_scores(net, valid_data, threshold, loss_fn, out_dim, device)
     return train_scores, train_TFPN, valid_scores, valid_TFPN
 
-def eval_scores(net, data, threshold, loss_fn, device):
+def eval_scores(net, data, threshold, loss_fn, out_dim, device):
     """
     Evaluate the model on the given data.
     This will use Kappa, F1 score and Specificity.
@@ -44,8 +44,7 @@ def eval_scores(net, data, threshold, loss_fn, device):
         for sample in data:
             image = sample['image'].unsqueeze(0).to(device, torch.float)
             label = torch.tensor(sample['label'])
-            output = net(image).view(-1, 1).cpu()
-            pr = F.sigmoid(output).item()
+            output = net(image).cpu()
 
             #utils.show_image(sample['image'], sample['label'], sample['name'])
 
@@ -53,7 +52,11 @@ def eval_scores(net, data, threshold, loss_fn, device):
             loss = loss_fn(output, label.view(-1, 1).float())
             losses.append(loss.item())
 
-            label_pred = int(pr >= threshold)
+            if out_dim == 1:
+                pr = F.sigmoid(output).item()
+                label_pred = int(pr >= threshold)
+            elif out_dim == 2:
+                label_pred = int(output.argmax(1).item())
 
             TP += int(label_pred and label.item() == 1)
             FP += int(label_pred and label.item() == 0)
@@ -75,7 +78,7 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
     net.eval()
 
     with torch.no_grad():
-        _, _, valid_scores, _ = eval(net, None, data, args.threshold, loss_fn, device)
+        _, _, valid_scores, _ = eval(net, None, data, args.threshold, loss_fn, args.out_dim, device)
 
         best_threshold = 0.5
         best_scores = valid_scores
@@ -83,7 +86,7 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
         for threshold in th_range:
             if threshold == 0.5:
                 continue
-            _, _, new_scores, _ = eval(net, None, data, threshold, loss_fn, device)
+            _, _, new_scores, _ = eval(net, None, data, threshold, loss_fn, args.out_dim, device)
 
             if new_scores["Average"] > best_scores["Average"]:
                 best_scores = new_scores
@@ -121,18 +124,22 @@ def train(args, seed=123):
 
     # init model
     # example: if args.model == 'ResNet34', then net = network.ResNet34()
-    net = getattr(network, args.model)()
+    net = getattr(network, args.model)(num_classes=args.out_dim)
     net = net.to(device)
 
-    # calculate the fraction of (<nagetive labels number> / <positive labels number>)
-    # this is used to balance the loss function
-    n_positive = sum([x['label'] == 1 for x in train_data])
-    n_negative = len(train_data) - n_positive
-    print(f'\tnumber of positive labels: {n_positive}\tnumber of negative labels: {n_negative}')
-    pos_weight = torch.tensor(n_negative * 1.0 / n_positive)
+    if args.out_dim == 1: 
+        # calculate the fraction of (<nagetive labels number> / <positive labels number>)
+        # this is used to balance the loss function
+        n_positive = sum([x['label'] == 1 for x in train_data])
+        n_negative = len(train_data) - n_positive
+        print(f'\tnumber of positive labels: {n_positive}\tnumber of negative labels: {n_negative}')
+        pos_weight = torch.tensor(n_negative * 1.0 / n_positive)
 
-    # loss function: sigmoid + BCELoss
-    loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        # loss function: sigmoid + BCELoss
+        loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    elif args.out_dim == 2:
+        print(f'\tOutput dimension: {args.out_dim} and will use CrossEntropyLoss.')
+        loss_fn = utils.cross_entropy_loss
 
     # optimizer
     params = net.parameters()
@@ -227,7 +234,8 @@ def train(args, seed=123):
         # evaluate the model on the validation set
         if (epoch + 1) % args.eval_every == 0:
             eval_start_time = time.time()
-            train_scores, train_TFPN, valid_scores, valid_TFPN = eval(net, train_data, valid_data, args.threshold, loss_fn, device)
+            train_scores, train_TFPN, valid_scores, valid_TFPN = eval(
+                net, train_data, valid_data, args.threshold, loss_fn, args.out_dim, device)
             print(f'[ Epoch {epoch + 1:3} ]',
                 f'train score: {train_scores["Average"]:.4f}',
                 f'|| valid score: {valid_scores["Average"]:.4f}',
@@ -305,6 +313,7 @@ if __name__ == '__main__':
     parser.add_argument('--optimizer', choices=['adam', 'sgd'], default='adam', help='optimizer')
 
     # model parameters
+    parser.add_argument('--out_dim', type=int, default=1, choices=[1, 2], help='output dimension')
     parser.add_argument('--threshold', type=float, default=0.5, help='threshold for classification')
     parser.add_argument('--model', type=str, default='ResNet34', help='model name')
     parser.add_argument('--is_search', type=str, choices=['0', '1'], default=0, help='whether to search the best threshold')

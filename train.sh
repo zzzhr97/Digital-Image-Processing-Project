@@ -18,6 +18,7 @@ python train.py \
 --is_shuffle True \
 --optimizer adam \
 
+--out_dim 1 \
 --threshold 0.5 \
 --model TestNet \
 --is_search 0 \

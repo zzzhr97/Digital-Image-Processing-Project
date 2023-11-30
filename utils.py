@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 import os
 import numpy as np
 import random
@@ -152,3 +153,8 @@ def transform_data(data, transform_method_epoch):
             data[i] = transform(data[i])
 
     return data
+
+def cross_entropy_loss(output, label):
+    """cross entropy loss with one-hot encoding."""
+    loss = torch.nn.CrossEntropyLoss()(output, label.squeeze(1).long())
+    return loss
