@@ -72,7 +72,7 @@ def eval_scores(net, data, threshold, loss_fn, out_dim, device):
 def search_threshold(args, seed, loss_fn, load_path, data, device):
     """search the best threshold in validation set for classification."""
     print('Searching the best threshold in validation set for classification...')
-    net = getattr(network, args.model)()
+    net = getattr(network, args.model)(num_classes=args.out_dim)
     net = net.to(device)
     utils.load_checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best.pth', load_path, device)
     net.eval()
@@ -309,14 +309,14 @@ if __name__ == '__main__':
     parser.add_argument('--lr_decay_values', nargs="+", type=float, default=[], 
                         help='modify learning rate by this value')
     parser.add_argument('--weight_decay', type=float, default=0.0, help='weight decay')
-    parser.add_argument('--is_shuffle', type=bool, default=False, help='shuffle the training/validation data partition')
+    parser.add_argument('--is_shuffle', type=str, choices=['0', '1'], default='1', help='shuffle the training/validation data partition')
     parser.add_argument('--optimizer', choices=['adam', 'sgd'], default='adam', help='optimizer')
 
     # model parameters
     parser.add_argument('--out_dim', type=int, default=1, choices=[1, 2], help='output dimension')
     parser.add_argument('--threshold', type=float, default=0.5, help='threshold for classification')
     parser.add_argument('--model', type=str, default='ResNet34', help='model name')
-    parser.add_argument('--is_search', type=str, choices=['0', '1'], default=0, help='whether to search the best threshold')
+    parser.add_argument('--is_search', type=int, choices=['0', '1'], default='0', help='whether to search the best threshold')
 
     # logging parameters
     parser.add_argument('--ckpt_dir', type=str, default='checkpoints', help='path to saved checkpoints')
@@ -328,5 +328,6 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     args = parser.parse_args()
     args.is_search = True if args.is_search == '1' else False
+    args.is_shuffle = True if args.is_shuffle == '1' else False
     print("-------------------BEGIN-------------------")
     main(args)

@@ -13,7 +13,7 @@ python train.py ^
 --lr_decay_epochs 15 30 50 ^
 --lr_decay_values 0.0001 0.00002 0.00001 ^
 --weight_decay 0.0001 ^
---is_shuffle True ^
+--is_shuffle 1 ^
 --optimizer adam ^
     ^
 --out_dim 1 ^

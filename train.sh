@@ -5,7 +5,7 @@ python train.py \
 --seed 1 \
 --device cuda \
 --data_dir dataset \
-
+\
 --n_valid 64 \
 --transform_method_origin 1 \
 --transform_method_epoch 2 \
@@ -15,14 +15,14 @@ python train.py \
 --lr_decay_epochs 15 \
 --lr_decay_values 0.00001 \
 --weight_decay 0.0001 \
---is_shuffle True \
+--is_shuffle 1 \
 --optimizer adam \
-
+\
 --out_dim 1 \
 --threshold 0.5 \
 --model TestNet \
 --is_search 0 \
-
+\
 --ckpt_dir checkpoints \
 --result_dir results \
 --ckpt_every 10 \

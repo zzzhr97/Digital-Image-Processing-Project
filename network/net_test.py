@@ -3,7 +3,7 @@ from torch import nn
 import torchvision.models as models
 
 class TestNet(nn.Module):
-    def __init__(self, weights=None):
+    def __init__(self, num_classes, weights=None):
         super(TestNet, self).__init__()
         self.resnet = models.resnet34(weights=weights)
         num_features = self.resnet.fc.in_features
@@ -26,7 +26,7 @@ class TestNet(nn.Module):
         self.linear_layer = nn.Sequential(
             nn.Linear(8*32*32, 320),                             
             nn.ReLU(),          
-            nn.Linear(320, 1)                                
+            nn.Linear(320, num_classes)                                
         )
 
     def forward(self, x):
