@@ -316,7 +316,7 @@ if __name__ == '__main__':
     parser.add_argument('--out_dim', type=int, default=1, choices=[1, 2], help='output dimension')
     parser.add_argument('--threshold', type=float, default=0.5, help='threshold for classification')
     parser.add_argument('--model', type=str, default='ResNet34', help='model name')
-    parser.add_argument('--is_search', type=int, choices=['0', '1'], default='0', help='whether to search the best threshold')
+    parser.add_argument('--is_search', type=str, choices=['0', '1'], default='0', help='whether to search the best threshold')
 
     # logging parameters
     parser.add_argument('--ckpt_dir', type=str, default='checkpoints', help='path to saved checkpoints')
