@@ -25,7 +25,7 @@
 ### 命令行参数
 - *base parameters*:
   - `task`: 任务数字，`1`或`2`
-  - `seed`: 随机种子编号
+  - `seed`: 随机种子编号。在超参数不变的情况下，seed设置相同，那么结果就会一模一样，如果seed设置不同，结果就会不同
   - `device`: 设备，`cuda`或`cpu`
   - `data_dir`: 数据集存放路径
 - *optimization parameters*:
