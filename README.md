@@ -35,8 +35,8 @@
   - `batch_size`: 每个轮次训练时的批大小
   - `n_epochs`: 轮次次数
   - `lr`: 学习率
-  - `lr_decay_epochs`: 学习率发生改变的对应轮次
-  - `lr_decay_values`: 学习率发生改变的目标数值
+  - `lr_decay_epochs`: 学习率发生改变的对应轮次，可以添加多个轮次数值
+  - `lr_decay_values`: 学习率发生改变的目标数值，可以添加多个学习率数值
   - `weight_decay`: adam优化器的正则化参数，用于调整网络的敏感程度，越大，敏感程度越小
   - `is_shuffle`: 是否在读取数据、划分训练集/验证集时进行随机打乱
   - `optimizer`: 优化器，默认有两种选择,adam与sgd
