@@ -39,7 +39,8 @@ def load_checkpoint(net, file_name, load_path, device):
 
 def visualize_results(results, best_valid_result):
     """visualize the results."""
-    results = results[:-1]  # remove the last element {'best_threshold': best threshold in validation set}
+    if list(results[-1].keys())[0] == 'best_threshold':
+        results = results[:-1]  # remove the last element {'best_threshold': best threshold in validation set}
     counter = [i['epoch'] for i in results]
     train_losses = [i['train_score']['Loss'] for i in results]
     valid_losses = [i['valid_score']['Loss'] for i in results]
