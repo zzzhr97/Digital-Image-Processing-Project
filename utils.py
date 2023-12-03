@@ -50,7 +50,7 @@ def visualize_results(results, best_valid_result):
     plt.plot(counter, train_losses, color='red')
     plt.plot(counter, valid_losses, color='green')
     plt.title("Loss")
-    plt.legend(['Train', 'Validation'], loc='upper right')
+    plt.legend(['Train', 'Validation'], loc='best')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
@@ -58,7 +58,7 @@ def visualize_results(results, best_valid_result):
     plt.plot(counter, train_avg_score, color='red')
     plt.plot(counter, valid_avg_score, color='green')
     plt.title("Average Score")
-    plt.legend(['Train', 'Validation'], loc='upper right')
+    plt.legend(['Train', 'Validation'], loc='best')
     plt.xlabel('Epoch')
     plt.ylabel('Average Score')
 
