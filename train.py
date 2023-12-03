@@ -10,65 +10,6 @@ import transform
 import network
 import utils
 
-def eval(net, train_data, valid_data, threshold, loss_fn, out_dim, device):
-    """
-    Evaluate the model on the training set and validation set.
-    This will use Kappa, F1 score and Specificity.
-
-    Format: {
-        'Loss': average loss, 
-        'Kappa': kappa, 
-        'F1': f1, 
-        'Specificity': specificity,
-        'Average': average score of the above three
-    }
-
-    Returns: train scores, validation scores
-    """
-    train_scores, train_TFPN = eval_scores(net, train_data, threshold, loss_fn, out_dim, device)
-    valid_scores, valid_TFPN = eval_scores(net, valid_data, threshold, loss_fn, out_dim, device)
-    return train_scores, train_TFPN, valid_scores, valid_TFPN
-
-def eval_scores(net, data, threshold, loss_fn, out_dim, device):
-    """
-    Evaluate the model on the given data.
-    This will use Kappa, F1 score and Specificity.
-    """
-    if data is None:
-        return None
-    
-    net.eval()
-    with torch.no_grad():
-        TP, TN, FP, FN = 0, 0, 0, 0
-        losses = []
-        for sample in data:
-            image = sample['image'].unsqueeze(0).to(device, torch.float)
-            label = torch.tensor(sample['label'])
-            output = net(image).cpu()
-
-            #utils.show_image(sample['image'], sample['label'], sample['name'])
-
-            # calculate loss
-            loss = loss_fn(output, label.view(-1, 1).float())
-            losses.append(loss.item())
-
-            if out_dim == 1:
-                pr = F.sigmoid(output).item()
-                label_pred = int(pr >= threshold)
-            elif out_dim == 2:
-                label_pred = int(output.argmax(1).item())
-
-            TP += int(label_pred and label.item() == 1)
-            FP += int(label_pred and label.item() == 0)
-            TN += int(not label_pred and label.item() == 0)
-            FN += int(not label_pred and label.item() == 1)
-
-        scores = utils.cal_scores(losses, TP, FP, TN, FN)
-        TFPN = {'TP': TP, 'FP': FP, 'TN': TN, 'FN': FN}
-
-    net.train() 
-    return scores, TFPN
-
 def search_threshold(args, seed, loss_fn, load_path, data, device):
     """search the best threshold in validation set for classification."""
     print('Searching the best threshold in validation set for classification...')
@@ -78,7 +19,7 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
     net.eval()
 
     with torch.no_grad():
-        _, _, valid_scores, _ = eval(net, None, data, args.threshold, loss_fn, args.out_dim, device)
+        _, _, valid_scores, _ = utils.eval(net, None, data, args.threshold, loss_fn, args.out_dim, device)
 
         best_threshold = 0.5
         best_scores = valid_scores
@@ -86,7 +27,7 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
         for threshold in th_range:
             if threshold == 0.5:
                 continue
-            _, _, new_scores, _ = eval(net, None, data, threshold, loss_fn, args.out_dim, device)
+            _, _, new_scores, _ = utils.eval(net, None, data, threshold, loss_fn, args.out_dim, device)
 
             if new_scores["Average"] > best_scores["Average"]:
                 best_scores = new_scores
@@ -234,7 +175,7 @@ def train(args, seed=123):
         # evaluate the model on the validation set
         if (epoch + 1) % args.eval_every == 0:
             eval_start_time = time.time()
-            train_scores, train_TFPN, valid_scores, valid_TFPN = eval(
+            train_scores, train_TFPN, valid_scores, valid_TFPN = utils.eval(
                 net, train_data, valid_data, args.threshold, loss_fn, args.out_dim, device)
             print(f'[ Epoch {epoch + 1:3} ]',
                 f'train score: {train_scores["Average"]:.4f}',

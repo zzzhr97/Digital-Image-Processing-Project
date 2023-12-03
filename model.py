@@ -1,0 +1,71 @@
+import os
+import cv2
+import torch
+from torch import nn
+import torchvision.models as models
+
+import transform
+from network import *
+
+net = TestNet
+num_classes = 2
+ckpt_path = "Net.pth"
+transform_method_origin = 1
+
+class model:
+    def __init__(self, device=torch.device("cpu")):
+        self.checkpoint = ckpt_path
+        self.device = device
+
+    def load(self, dir_path):
+        """
+        load the model and weights.
+        dir_path is a string for internal use only - do not remove it.
+        all other paths should only contain the file name, these paths must be
+        concatenated with dir_path, for example: os.path.join(dir_path, filename).
+        make sure these files are in the same directory as the model.py file.
+        :param dir_path: path to the submission directory (for internal use only).
+        :return:
+        """
+        self.model = net(num_classes=num_classes)
+        # join paths
+        checkpoint_path = os.path.join(dir_path, self.checkpoint)
+        self.model.load_state_dict(torch.load(checkpoint_path, map_location=self.device))
+        self.model.to(self.device)
+        self.model.eval()
+
+    def predict(self, input_image):
+        """
+        perform the prediction given an image.
+        input_image is a ndarray read using cv2.imread(path_to_image, 1).
+        note that the order of the three channels of the input_image read by cv2 is BGR.
+        :param input_image: the input image to the model.
+        :return: an int value indicating the class for the input image
+        """
+        # image transform
+        image = transform.transform_method(method=transform_method_origin)(input_image)
+
+        # image dimension expansion (do not change)
+        image = image.unsqueeze(0)   # (3, x, x) -> (1, 3, x, x)
+
+        # image to device
+        image = image.to(self.device, torch.float)
+
+        with torch.no_grad():
+            score = self.model(image)
+        _, pred_class = torch.max(score, dim=1)
+
+        pred_class = pred_class.detach().cpu()
+        pred_class = int(pred_class)
+        return pred_class
+
+
+class Net(nn.Module):
+    def __init__(self, num_classes=2, pretrained=False):
+        super(Net, self).__init__()
+        self.pretrained = pretrained
+
+    def forward(self, x):
+        x = self.net(x)
+        return x
+

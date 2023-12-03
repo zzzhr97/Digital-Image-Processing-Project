@@ -105,6 +105,65 @@ def save_results(args, results, file_name, save_path):
 
     print(f'\tResults saved to {file_name}')
 
+def eval(net, train_data, valid_data, threshold, loss_fn, out_dim, device):
+    """
+    Evaluate the model on the training set and validation set.
+    This will use Kappa, F1 score and Specificity.
+
+    Format: {
+        'Loss': average loss, 
+        'Kappa': kappa, 
+        'F1': f1, 
+        'Specificity': specificity,
+        'Average': average score of the above three
+    }
+
+    Returns: train scores, validation scores
+    """
+    train_scores, train_TFPN = eval_scores(net, train_data, threshold, loss_fn, out_dim, device)
+    valid_scores, valid_TFPN = eval_scores(net, valid_data, threshold, loss_fn, out_dim, device)
+    return train_scores, train_TFPN, valid_scores, valid_TFPN
+
+def eval_scores(net, data, threshold, loss_fn, out_dim, device):
+    """
+    Evaluate the model on the given data.
+    This will use Kappa, F1 score and Specificity.
+    """
+    if data is None:
+        return None
+    
+    net.eval()
+    with torch.no_grad():
+        TP, TN, FP, FN = 0, 0, 0, 0
+        losses = []
+        for sample in data:
+            image = sample['image'].unsqueeze(0).to(device, torch.float)
+            label = torch.tensor(sample['label'])
+            output = net(image).cpu()
+
+            #show_image(sample['image'], sample['label'], sample['name'])
+
+            # calculate loss
+            loss = loss_fn(output, label.view(-1, 1).float())
+            losses.append(loss.item())
+
+            if out_dim == 1:
+                pr = F.sigmoid(output).item()
+                label_pred = int(pr >= threshold)
+            elif out_dim == 2:
+                label_pred = int(output.argmax(1).item())
+
+            TP += int(label_pred and label.item() == 1)
+            FP += int(label_pred and label.item() == 0)
+            TN += int(not label_pred and label.item() == 0)
+            FN += int(not label_pred and label.item() == 1)
+
+        scores = cal_scores(losses, TP, FP, TN, FN)
+        TFPN = {'TP': TP, 'FP': FP, 'TN': TN, 'FN': FN}
+
+    net.train() 
+    return scores, TFPN
+
 def cal_scores(losses, TP, FP, TN, FN):
     """
     calculate scores.
@@ -112,10 +171,11 @@ def cal_scores(losses, TP, FP, TN, FN):
     Returns: 
         - scores (dict), example: {'Loss': 10000.0, 'Kappa': 0.0, 'F1': 0.0, 'Specificity': 0.0, 'Average': 0.0}
     """
-    scores = {'Loss': 10000.0, 'Kappa': 0.0, 'F1': 0.0, 'Specificity': 0.0, 'Average': 0.0}
+    scores = {}
 
     # loss
-    scores['Loss'] = sum(losses) / len(losses)
+    if losses is not None:
+        scores['Loss'] = sum(losses) / len(losses)
 
     TP = TP + 1e-10
     FP = FP + 1e-10
@@ -130,7 +190,7 @@ def cal_scores(losses, TP, FP, TN, FN):
     # F1 score
     precision = TP / (TP + FP)
     recall = TP / (TP + FN)
-    scores['F1'] = 2 * precision * recall / (precision + recall + 1e-10)
+    scores['F1'] = 2 * precision * recall / (precision + recall)
 
     # specificity
     scores['Specificity'] = TN / (TN + FP)

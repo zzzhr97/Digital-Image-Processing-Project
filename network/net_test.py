@@ -5,10 +5,6 @@ import torchvision.models as models
 class TestNet(nn.Module):
     def __init__(self, num_classes, weights=None):
         super(TestNet, self).__init__()
-        self.resnet = models.resnet34(weights=weights)
-        num_features = self.resnet.fc.in_features
-        self.resnet.fc = nn.Linear(in_features=num_features, out_features=1)
-
         self.conv_layer = nn.Sequential(
             nn.Conv2d(3, 4, kernel_size=3, stride=1, padding=1),    # (3, 512, 512) -> (4, 512, 512)
             nn.ReLU(),  

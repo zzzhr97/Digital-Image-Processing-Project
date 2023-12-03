@@ -119,6 +119,10 @@ class hyper_dataset(Dataset):
             self.permutation = np.random.permutation(len(data))
             data = [data[i] for i in self.permutation]
 
+        # return all data for the first if n_valid is 0
+        if self.n_valid == 0:
+            return data, None
+        
         train_data = data[:-self.n_valid]
         valid_data = data[-self.n_valid:]
         return train_data, valid_data

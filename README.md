@@ -13,6 +13,8 @@
 8. `train.py` 训练模型
 9. `train.bat` *windows* 运行脚本
 10. `train.sh` *linux* 运行脚本
+11. `model.py` 用于在测试集上评估模型的模型文件
+12. `eval_model.py` 模拟在测试集上对模型进行评估（实际使用了训练集）
 
 ### 注意事项
 
@@ -21,6 +23,24 @@
 3. 结果数据保存在`./results/`中，该文件夹不会被上传至github，需要另外保存。
 4. 每次训练完毕，都会在主文件夹中生成`results.png`用于可视化训练过程。
 5. 神经网络调用时，要求接收一个参数`num_classes`，用于调整最后输出的大小。
+
+### 模拟模型评估步骤
+
+- 打开`model.py`文件，设置参数:
+  - `net`: 存在于`network`文件夹下的模型类名，比如`TestNet`
+  - `num_classes`: 模型最后一层输出的形状，`1`或`2`
+  - `ckpt_path`: 权重文件名，默认为`Net.pth`
+  - `transform_method_origin`: 读取数据时所用的预处理方法编号
+- 设置模型的方法有两种
+  - **方法一** 将`model.py`中的`net`设置成该模型名，如`TestNet`
+  - **方法二** 将`model.py`中的`net`设置成`Net`，然后将想要使用的模型代码复制至`model.py`中的`Net`类中 ***(除了类名为`Net`，其他代码应当和原模型代码一致)***
+- 打开`eval_model.py`文件，设置参数：
+  - `task`: 任务数字，`1`或`2`，默认为`1`
+- 将想要评估的模型权重文件放到主文件夹下，并重命名成第一步设置的`ckpt_path`，默认为`Net.pth`。
+- 运行命令：
+```python
+python eval_model.py
+```
 
 ### 命令行参数
 - *base parameters*:
@@ -54,10 +74,34 @@
 
 ### 记录
 
-- *v0.1*: 建立项目
-- *v0.2*: 完成数据读取，数据预处理，训练功能
-  - *v0.2.1*: 完善代码并添加`utils.py`文件。
-- *v0.3*: 添加`DenseNet`和`ResNet`网络代码，添加`is_search`命令行参数，完善代码。同时删除了github上的results文件夹，改为本地保存。
-  - *v0.3.1*: 添加`transform_method_origin`和`transform_method_epoch`命令行参数，用于在训练时引入数据增强功能。修复一些小bug，并将最终结果保存成图片文件`results.png`，方便查看训练结果。此外，在训练时，不仅会打印`score`和`loss`，还会打印训练和验证集的`TP`，`TN`，`FP`，`FN`。
-  - *v0.3.2*: 添加`out_dim`命令行参数，用于控制输出大小，为`1`输出大小为`[batch_size, 1]`，为`2`输出大小为`[batch_size, 2]`。如果为`1`，使用神经网络输出值经过`sigmoid`所得作为正样本概率；如果为`2`，使用神经网络输出的两个值分别作为负样本、正样本概率。
-  - *v0.3.3*: 在`README.md`中添加对命令行参数的详细中文解释，修改了一些命令行参数的数据类型
+- *v0.1*
+  - *v0.1.0* 
+    - 建立项目
+- *v0.2* 
+  - *v0.2.0*
+    - 完成数据读取，数据预处理，训练功能
+  - *v0.2.1*
+    - 完善代码并添加`utils.py`文件。
+- *v0.3*
+  - *v0.3.0*
+    - 添加`DenseNet`和`ResNet`网络代码
+    - 添加`is_search`命令行参数，完善代码
+    - 删除了github上的results文件夹，改为本地保存
+  - *v0.3.1*
+    - 添加`transform_method_origin`和`transform_method_epoch`命令行参数，用于在训练时引入数据增强功能
+    - 修复一些小bug
+    - 将最终结果保存成图片文件`results.png`，方便查看训练结果
+    - 在训练时，不仅会打印`score`和`loss`，还会打印训练和验证集的`TP`，`TN`，`FP`，`FN`。
+  - *v0.3.2*
+    - 添加`out_dim`命令行参数，用于控制输出大小，为`1`输出大小为`[batch_size, 1]`，为`2`输出大小为`[batch_size, 2]`。如果为`1`，使用神经网络输出值经过`sigmoid`所得作为正样本概率；如果为`2`，使用神经网络输出的两个值分别作为负样本、正样本概率。
+  - *v0.3.3*
+    - 在`README.md`中添加对命令行参数的详细中文解释
+    - 修改了一些命令行参数的数据类型
+- *v0.4*
+  - *v0.4.0*
+    - 完成`model.py`和`eval_model.py`文件
+    - 在`data.py`中添加`n_valid`为`0`时的特殊情况
+    - 删除`net_test.py`中`TestNet`中不必要的模型参数，防止在保存和加载模型参数时出错
+    - 将`train.py`中计算分数的函数移至`utils.py`中
+    - `utils/cal_scores`汇总结果时，添加`losses`为`None`的情况
+    - 修改`README.md`
