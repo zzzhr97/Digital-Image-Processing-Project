@@ -88,6 +88,15 @@ bash visual.sh
   - `eval_every`: 每多少个epoch进行一次训练集和验证集loss和score的评估，打印并保存到results中
   - `print_every`: 每个epoch中，每多少个batch进行一次训练集上loss的打印
 
+### 预处理
+1. xxx
+
+### 论文
+1. xxx
+
+### 数据集
+1. [全球94个开放获取数据库特征——《全球眼科图像公开数据库使用指南（2022）》附表](http://www.ykxjz.com/docs/tzgg/details.aspx?documentid=54&Nid=A967CBAD-BC53-4787-88ED-CD9D9ABAA7DE)
+
 ### 记录
 
 - *v0.1*
@@ -124,3 +133,5 @@ bash visual.sh
 - *v0.5*
   - *v0.5.0*
     - 完成`visual.py`文件，用于可视化数据集，方便查看图像、对应 label 及图像名
+  - *v0.5.1*
+    - 添加`README.md`中的预处理、论文、数据集部分。
