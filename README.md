@@ -15,6 +15,10 @@
 10. `train.sh` *linux* 运行脚本
 11. `model.py` 用于在测试集上评估模型的模型文件
 12. `eval_model.py` 模拟在测试集上对模型进行评估（实际使用了训练集）
+13. `./visual/` 用于存放数据集可视化之后的图片，**不会上传至github，需要另外保存**
+14. `visual.py` 用于批量可视化数据集
+15. `visual.bat` 运行`visual.py`的*windows*脚本
+16. `visual.sh` 运行`visual.py`的*linux*脚本
 
 ### 注意事项
 
@@ -38,8 +42,20 @@
   - `task`: 任务数字，`1`或`2`，默认为`1`
 - 将想要评估的模型权重文件放到主文件夹下，并重命名成第一步设置的`ckpt_path`，默认为`Net.pth`。
 - 运行命令：
-```python
+```bash
 python eval_model.py
+```
+
+### 可视化数据集
+使用下列命令来查看命令行参数信息。
+```bash
+python visual.py -h
+```
+运行脚本，生成图片。
+```bash
+visual.bat
+# or
+bash visual.sh
 ```
 
 ### 命令行参数
@@ -105,3 +121,6 @@ python eval_model.py
     - 将`train.py`中计算分数的函数移至`utils.py`中
     - `utils/cal_scores`汇总结果时，添加`losses`为`None`的情况
     - 修改`README.md`
+- *v0.5*
+  - *v0.5.0*
+    - 完成`visual.py`文件，用于可视化数据集，方便查看图像、对应 label 及图像名
