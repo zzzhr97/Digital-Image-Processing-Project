@@ -6,8 +6,8 @@
 - 新建文件夹`upload_dir`
 - 将`model.py`，`eval_model.py`，`transform.py`，`data.py`，`utils.py`以及`metadata`放在`upload_dir`下
 - 将模型权重文件复制到`upload_dir`下，并改名成`Net.pth`
-- 打开`./upload_dir/model.py`文件，设置参数:
-  - `net`: 存在于`network`文件夹下的模型类名，比如`TestNet`
+- 打开`./upload_dir/model.py`文件，**注释掉`from network import *`这一行**，并设置参数:
+  - `net`: 存在于`network`文件夹下的模型类名，请**注释掉这一行**
   - `num_classes`: 模型最后一层输出的形状，`1`或`2`
   - `ckpt_path`: 权重文件名，默认为`Net.pth`
   - `transform_method_origin`: 读取数据时所用的预处理方法编号
