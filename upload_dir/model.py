@@ -7,7 +7,7 @@ from Net import SResNet
 
 net = SResNet
 num_classes = 2
-ckpt_path = "Net.pth"
+ckpt_path = "upload_dir/Net.pth"
 transform_method_origin = 1
 
 class model:
