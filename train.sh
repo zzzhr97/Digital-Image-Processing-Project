@@ -11,12 +11,15 @@ python train.py \
 --transform_method_epoch 2 \
 --batch_size 4 \
 --n_epochs 5 \
+--is_shuffle 1 \
+\
+--optimizer adam \
 --lr 0.0001 \
 --lr_decay_epochs 15 \
 --lr_decay_values 0.00001 \
 --weight_decay 0.0001 \
---is_shuffle 1 \
---optimizer adam \
+--betas 0.9 0.999 \
+--momentum 0.9 \
 \
 --out_dim 1 \
 --threshold 0.5 \

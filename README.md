@@ -70,12 +70,15 @@ bash visual.sh
   - `transform_method_epoch`: 训练时对训练数据进行的随机性预处理方法编号
   - `batch_size`: 每个轮次训练时的批大小
   - `n_epochs`: 轮次次数
+  - `is_shuffle`: 是否在读取数据、划分训练集/验证集时进行随机打乱
+- *optimizer parameters*:
+  - `optimizer`: 优化器，默认有两种选择,adam与sgd
   - `lr`: 学习率
   - `lr_decay_epochs`: 学习率发生改变的对应轮次，可以添加多个轮次数值
   - `lr_decay_values`: 学习率发生改变的目标数值，可以添加多个学习率数值
   - `weight_decay`: adam优化器的正则化参数，用于调整网络的敏感程度，越大，敏感程度越小
-  - `is_shuffle`: 是否在读取数据、划分训练集/验证集时进行随机打乱
-  - `optimizer`: 优化器，默认有两种选择,adam与sgd
+  - `betas`: adam优化器的衰减因子，有两个，默认为`(0.9, 0.999)`
+  - `momentum`: SGD优化器的动量参数,默认为`0.9`
 - *model parameters*:
   - `out_dim`: 网络最后一层输出的形状，`1`或`2`
   - `threshold`: `out_dim`为`1`时，划分正负样本的边界，默认为0.5
@@ -135,3 +138,5 @@ bash visual.sh
     - 完成`visual.py`文件，用于可视化数据集，方便查看图像、对应 label 及图像名
   - *v0.5.1*
     - 添加`README.md`中的预处理、论文、数据集部分。
+  - *v0.5.2*
+    - 在命令行参数中添加`Adam`的`betas`和`SGD`的`momentum`参数

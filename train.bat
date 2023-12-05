@@ -9,12 +9,15 @@ python train.py ^
 --transform_method_epoch 2 ^
 --batch_size 4 ^
 --n_epochs 60 ^
+--is_shuffle 1 ^
+    ^
+--optimizer adam ^
 --lr 0.0001 ^
 --lr_decay_epochs 15 30 50 ^
 --lr_decay_values 0.0001 0.00007 0.00004 ^
 --weight_decay 0.0004 ^
---is_shuffle 1 ^
---optimizer adam ^
+--betas 0.9 0.999 ^
+--momentum 0.9 ^
     ^
 --out_dim 2 ^
 --threshold 0.5 ^

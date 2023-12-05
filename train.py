@@ -85,9 +85,9 @@ def train(args, seed=123):
     # optimizer
     params = net.parameters()
     if args.optimizer == "adam":
-        optimizer = torch.optim.Adam(params, lr=args.lr, betas=(.9, .999), weight_decay=args.weight_decay)
+        optimizer = torch.optim.Adam(params, lr=args.lr, betas=(args.betas[0], args.betas[1]), weight_decay=args.weight_decay)
     elif args.optimizer == "sgd":
-        optimizer = torch.optim.SGD(params, lr=args.lr, momentum=.9, weight_decay=args.weight_decay)
+        optimizer = torch.optim.SGD(params, lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
     best_valid_result = {'Loss': 1e10, 'Kappa': 0.0, 'F1': 0.0, 'Specificity': 0.0, 'Average': 0.0}
     results = []
@@ -244,14 +244,18 @@ if __name__ == '__main__':
                         help='transform method number for each image while in each epoch')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size')
     parser.add_argument('--n_epochs', type=int, default=100, help='number of epochs')
+    parser.add_argument('--is_shuffle', type=str, choices=['0', '1'], default='1', help='shuffle the training/validation data partition')
+    
+    # optimizer parameters
+    parser.add_argument('--optimizer', choices=['adam', 'sgd'], default='adam', help='optimizer')
     parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
     parser.add_argument('--lr_decay_epochs', nargs="+", type=int, default=[],
                         help="decay learning rate at these epochs")
     parser.add_argument('--lr_decay_values', nargs="+", type=float, default=[], 
                         help='modify learning rate by this value')
     parser.add_argument('--weight_decay', type=float, default=0.0, help='weight decay')
-    parser.add_argument('--is_shuffle', type=str, choices=['0', '1'], default='1', help='shuffle the training/validation data partition')
-    parser.add_argument('--optimizer', choices=['adam', 'sgd'], default='adam', help='optimizer')
+    parser.add_argument('--betas', nargs="+", type=float, default=[0.9, 0.999], help='beta for adam optimizer')
+    parser.add_argument('--momentum', type=float, default=0.9, help='momentum for sgd optimizer')
 
     # model parameters
     parser.add_argument('--out_dim', type=int, default=1, choices=[1, 2], help='output dimension')
