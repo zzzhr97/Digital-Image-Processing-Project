@@ -162,3 +162,4 @@ bash visual.sh
   - *v0.5.2*
     - 在命令行参数中添加`Adam`的`betas`和`SGD`的`momentum`参数
     - 在`README.md`中添加测试并提交文件的指引
+    - 添加新的自定义网络`SResNet`
