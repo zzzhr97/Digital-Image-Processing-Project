@@ -1,11 +1,9 @@
 import os
-import cv2
 import torch
 from torch import nn
-import torchvision.models as models
 
 import transform
-from network import *
+from Net import SResNet
 
 net = SResNet
 num_classes = 2

@@ -8,4 +8,5 @@ results.png
 Net.pth
 visual/
 visual.zip
-upload_dir/
+final*
+upload_dir/Net.py
