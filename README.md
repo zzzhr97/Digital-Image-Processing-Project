@@ -3,22 +3,20 @@
 
 ### 评估并上传模型步骤
 
-- 新建文件夹`upload_dir`
-- 将`model.py`，`eval_model.py`，`transform.py`，`data.py`，`utils.py`以及`metadata`放在`upload_dir`下
+- 由于`transform.py`可能不同，将自己的`transform.py`替换掉`upload_dir`中的`transform.py`文件
 - 将模型权重文件复制到`upload_dir`下，并改名成`Net.pth`
-- 打开`./upload_dir/model.py`文件，**注释掉`from network import *`这一行**，并设置参数:
-  - `net`: 存在于`network`文件夹下的模型类名，请**注释掉这一行**
+- 将网络定义文件复制到`upload_dir`下，并改名成`Net.py`
+- 打开`./upload_dir/model.py`文件，添加 **`from Net import xxx`** ，其中 **xxx** 是`Net.py`文件中的模型类名，并设置参数:
+  - `net`: **`Net.py`文件中的模型类名**
   - `num_classes`: 模型最后一层输出的形状，`1`或`2`
   - `ckpt_path`: 权重文件名，默认为`Net.pth`
   - `transform_method_origin`: 读取数据时所用的预处理方法编号
-- 打开`./upload_dir/model.py`文件，将需要使用的网络类复制到该文件中，替换掉`Net`类，然后在`model`类中的`load`函数里，将类名修改成需要使用的网络类，比如`self.model = TestNet(num_classes=num_classes)`
-- 打开`./upload_dir/eval_model.py`文件，将`ARGS`类中的`self.data_dir`改成`../dataset`
 - 运行命令
 ```bash
 python upload_dir/eval_model.py
 ```
 - 如果运行成功，将会输出模型在整个数据集的结果，否则就需要先 **debug**
-- 将`model.py`，`transform.py`，`Net.pth`，`metadata`四个文件打包成`upload_1.zip`，其中的`1`代表第1次提交
+- 将`model.py`，`transform.py`，`Net.py`，`Net.pth`，`metadata`五个文件打包成`upload_1.zip`，其中的`1`代表第1次提交
 - 打开[提交网站](https://codalab.lisn.upsaclay.fr/competitions/11877#participate)
 - 在 **Particapate** 中的 **Submit / View Results** 板块下，点击 **Future Test Phase - Task 1** ，进行提交（如果是task2，就选择 **Future Test Phase - Task 2**)
 
