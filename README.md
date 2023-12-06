@@ -3,6 +3,7 @@
 
 ### 评估并上传模型步骤
 
+#### *务必在 `upload_dir` 中运行 `eval_model.py` ，得到合适的结果之后再提交！*
 - 由于`transform.py`可能不同，**将自己的`transform.py`替换掉`upload_dir/transform.py`文件**
 - 将模型权重文件复制到`upload_dir`下，并改名成`Net.pth`
 - 将网络定义文件复制到`upload_dir`下，并改名成`Net.py`
