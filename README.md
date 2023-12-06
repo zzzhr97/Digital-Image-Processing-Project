@@ -11,7 +11,7 @@
   - `num_classes`: 模型最后一层输出的形状，`1`或`2`
   - `ckpt_path`: 权重文件名，默认为`Net.pth`
   - `transform_method_origin`: 读取数据时所用的预处理方法编号
-  - `threshold`: `num_classes = 1`时，所使用的的`threshold`，范围在$0\sim 1$之间
+  - `threshold`: `num_classes = 1`时，所使用的的`threshold`，范围在 $0\sim 1$ 之间
 - 打开`./upload_dir/eval_model.py`文件，根据任务修改`task`编号
 - 运行命令
 ```bash
@@ -164,4 +164,4 @@ bash visual.sh
     - 在`README.md`中添加测试并提交文件的指引
     - 添加新的自定义网络`SResNet`
   - *v0.5.3*
-    - 修改`out_dim = 1`或者是`num_classes = 1`时`eval_model`运行结果错误的问题
+    - 修复`out_dim = 1`或者是`num_classes = 1`时`eval_model`运行结果错误的问题
