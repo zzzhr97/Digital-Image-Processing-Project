@@ -13,9 +13,9 @@
   - `transform_method_origin`: 读取数据时所用的预处理方法编号
   - `threshold`: `num_classes = 1`时，所使用的的`threshold`，范围在 $0\sim 1$ 之间
 - 打开`./upload_dir/eval_model.py`文件，根据任务修改`task`编号
-- 运行命令
+- 进入文件夹`upload_dir`，运行命令
 ```bash
-python upload_dir/eval_model.py
+python eval_model.py
 ```
 - 如果运行成功，将会输出模型在整个数据集的结果，否则就需要先 **debug**
 - 将`upload_dir`文件夹中的`model.py`，`transform.py`，`Net.py`，`Net.pth`，`metadata`五个文件打包成`upload_1.zip`，其中的`1`代表第1次提交
