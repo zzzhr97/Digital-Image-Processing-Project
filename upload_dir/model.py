@@ -7,7 +7,7 @@ from Net import TestNet
 
 net = TestNet
 num_classes = 1
-ckpt_path = "upload_dir/Net.pth"
+ckpt_path = "Net.pth"
 transform_method_origin = 1
 threshold = 0.5
 

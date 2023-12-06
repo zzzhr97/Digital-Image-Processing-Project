@@ -59,7 +59,7 @@ class transform_method:
         image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
 
         # normalize
-        image = image / 255.0
+        #image = image / 255.0
 
         return image
     

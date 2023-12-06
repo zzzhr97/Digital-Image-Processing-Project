@@ -9,7 +9,7 @@ task = 1
 
 class ARGS():
     def __init__(self):
-        self.data_dir = 'dataset'
+        self.data_dir = '../dataset'
         self.task = task
         self.n_valid = 0
         self.is_shuffle = False
