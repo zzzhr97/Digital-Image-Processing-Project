@@ -3,7 +3,7 @@
 
 ### 评估并上传模型步骤
 
-- 由于`transform.py`可能不同，将自己的`transform.py`替换掉`upload_dir`中的`transform.py`文件
+- 由于`transform.py`可能不同，**将自己的`transform.py`替换掉`upload_dir/transform.py`文件**
 - 将模型权重文件复制到`upload_dir`下，并改名成`Net.pth`
 - 将网络定义文件复制到`upload_dir`下，并改名成`Net.py`
 - 打开`./upload_dir/model.py`文件，添加 **`from Net import xxx`** ，其中 **xxx** 是`Net.py`文件中的模型类名，并设置参数:
@@ -11,12 +11,14 @@
   - `num_classes`: 模型最后一层输出的形状，`1`或`2`
   - `ckpt_path`: 权重文件名，默认为`Net.pth`
   - `transform_method_origin`: 读取数据时所用的预处理方法编号
+  - `threshold`: `num_classes = 1`时，所使用的的`threshold`，范围在$0\sim 1$之间
+- 打开`./upload_dir/eval_model.py`文件，根据任务修改`task`编号
 - 运行命令
 ```bash
 python upload_dir/eval_model.py
 ```
 - 如果运行成功，将会输出模型在整个数据集的结果，否则就需要先 **debug**
-- 将`model.py`，`transform.py`，`Net.py`，`Net.pth`，`metadata`五个文件打包成`upload_1.zip`，其中的`1`代表第1次提交
+- 将`upload_dir`文件夹中的`model.py`，`transform.py`，`Net.py`，`Net.pth`，`metadata`五个文件打包成`upload_1.zip`，其中的`1`代表第1次提交
 - 打开[提交网站](https://codalab.lisn.upsaclay.fr/competitions/11877#participate)
 - 在 **Particapate** 中的 **Submit / View Results** 板块下，点击 **Future Test Phase - Task 1** ，进行提交（如果是task2，就选择 **Future Test Phase - Task 2**)
 
@@ -161,3 +163,5 @@ bash visual.sh
     - 在命令行参数中添加`Adam`的`betas`和`SGD`的`momentum`参数
     - 在`README.md`中添加测试并提交文件的指引
     - 添加新的自定义网络`SResNet`
+  - *v0.5.3*
+    - 修改`out_dim = 1`或者是`num_classes = 1`时`eval_model`运行结果错误的问题

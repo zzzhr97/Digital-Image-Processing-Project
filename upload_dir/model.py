@@ -3,12 +3,13 @@ import torch
 from torch import nn
 
 import transform
-from Net import SResNet
+from Net import TestNet
 
-net = SResNet
-num_classes = 2
+net = TestNet
+num_classes = 1
 ckpt_path = "upload_dir/Net.pth"
 transform_method_origin = 1
+threshold = 0.5
 
 class model:
     def __init__(self, device=torch.device("cpu")):
@@ -51,8 +52,13 @@ class model:
 
         with torch.no_grad():
             score = self.model(image)
-        _, pred_class = torch.max(score, dim=1)
 
-        pred_class = pred_class.detach().cpu()
-        pred_class = int(pred_class)
+        if num_classes == 1:
+            pr = torch.sigmoid(score).detach().cpu().item()
+            pred_class = int(pr >= threshold)
+        elif num_classes == 2:
+            _, pred_class = torch.max(score, dim=1)
+            pred_class = pred_class.detach().cpu()
+            pred_class = int(pred_class)
+
         return pred_class
