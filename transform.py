@@ -64,15 +64,49 @@ class transform_method:
         return image
     
     def method_2(self, image):
+        """epoch transform method"""
         # input shape torch.tensor([3, x, x])
         assert image.shape[0] == 3, f'Input image must have 3 channels, but got {image.shape[0]} channels.'
 
-        # torch.flip(image, [2]) 执行垂直翻转
-        # torch.flip(image, [1]) 执行水平翻转
-        # 即0.25的几率进行水平翻转,0.25的几率进行垂直翻转,0.5的几率不进行翻转
+        # 即0.25的几率进行水平翻转
+        # 0.25的几率进行垂直翻转
+        # 0.5的几率不进行翻转
         if random.random() < 0.25:
             image = torch.flip(image, [1])
         elif random.random() < 0.5:
             image = torch.flip(image, [2])
+
+        # 0.25的几率进行90度旋转
+        # 0.25的几率进行180度旋转
+        # 0.25的几率进行270度旋转
+        # 0.25的几率不进行旋转
+        if random.random() < 0.25:
+            image = transforms.functional.rotate(image, 90)
+        elif random.random() < 0.5:
+            image = transforms.functional.rotate(image, 180)
+        elif random.random() < 0.75:
+            image = transforms.functional.rotate(image, 270)
+
+        return image
+
+    def method_12(self, image):
+        """origin transform method"""
+        # resize image
+        image = cv2.resize(image, (512, 512)) # (800, 800, 3) -> (512, 512, 3)
+
+        # convert to tensor
+        image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
+
+        # normalize to [0, 1]
+        #image = image / 255.0
+
+        # replace the pixel value that is more than threshold with replace_value
+        threshold = 0.98 * 255
+        mask = image > threshold
+
+        replace_value = image[~mask].mean()
+        image[mask] = replace_value
+
+        print(mask.sum().item())
 
         return image

@@ -29,18 +29,19 @@ python eval_model.py
 2. `./network/` 网络模型
 3. `./results/` 训练后生成，保存训练结果的`.csv`文件，**不会上传至github，需要另外保存**
 4. `./checkpoints/` 训练后生成，保存训练时的模型参数，为`.pth`文件，**不会上传至github，需要另外保存**
-5. `data.py` 数据读取和处理
-6. `transform.py` 数据预处理
-7. `utils.py` 包含了一些功能型函数
-8. `train.py` 训练模型
-9. `train.bat` *windows* 运行脚本
-10. `train.sh` *linux* 运行脚本
-11. `model.py` 用于在测试集上评估模型的模型文件
-12. `eval_model.py` 模拟在测试集上对模型进行评估（实际使用了训练集）
-13. `./visual/` 用于存放数据集可视化之后的图片，**不会上传至github，需要另外保存**
-14. `visual.py` 用于批量可视化数据集
-15. `visual.bat` 运行`visual.py`的*windows*脚本
-16. `visual.sh` 运行`visual.py`的*linux*脚本
+5. `./upload_dir/` 用于测试和提交模型的文件夹
+6. `data.py` 数据读取和处理
+7. `transform.py` 数据预处理
+8. `utils.py` 包含了一些功能型函数
+9. `train.py` 训练模型
+10. `train.bat` *windows* 运行脚本
+11. `train.sh` *linux* 运行脚本
+12. `model.py` 用于在测试集上评估模型的模型文件
+13. `eval_model.py` 模拟在测试集上对模型进行评估（实际使用了训练集）
+14. `./visual/` 用于存放数据集可视化之后的图片，**不会上传至github，需要另外保存**
+15. `visual.py` 用于批量可视化数据集
+16. `visual.bat` 运行`visual.py`的*windows*脚本
+17. `visual.sh` 运行`visual.py`的*linux*脚本
 
 ### 注意事项
 
@@ -166,3 +167,5 @@ bash visual.sh
     - 添加新的自定义网络`SResNet`
   - *v0.5.3*
     - 修复`out_dim = 1`或者是`num_classes = 1`时`eval_model`运行结果错误的问题
+  - *v0.5.4*
+    - 在`transform.py`中添加旋转的数据增强操作和去除高亮点的数据预处理方法。添加旋转的数据增强操作能够有效避免过拟合！
