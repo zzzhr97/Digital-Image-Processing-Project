@@ -182,3 +182,4 @@ bash visual.sh
 - *v0.6*
   - *v0.6.0*
     - 添加`tensorboard`可视化的支持，具体的可视化文件夹位于`./log`下，使用`tensorboard`的方法在`README.md`中
+    - 更改模型参数的保存：在训练时，不仅保存 loss 最小的模型参数，还会保存 average score 最大的模型参数。
