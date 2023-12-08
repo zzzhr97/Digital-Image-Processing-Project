@@ -170,3 +170,4 @@ bash visual.sh
     - 修复`out_dim = 1`或者是`num_classes = 1`时`eval_model`运行结果错误的问题
   - *v0.5.4*
     - 在`transform.py`中添加旋转的数据增强操作和去除高亮点的数据预处理方法。添加旋转的数据增强操作能够有效避免过拟合！
+    - 更新论文
