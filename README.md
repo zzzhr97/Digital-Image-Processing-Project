@@ -69,6 +69,14 @@ python eval_model.py
 python eval_model.py
 ```
 
+### Tensorboard可视化使用方法
+- 在主文件夹中输入命令：`cd log/task-1/TestNet`
+- 然后输入命令：`tensorboard --logdir=./ --port 7092`
+- **若在远程运行**，在**本地**命令行中输入`ssh -L 7092:localhost:7092 user@your_server_ip`，将本地的7092端口和远程服务器的7092端口关联起来（在本地训练时，忽略此步骤）
+- 在**本地**打开命令行出现的网址，即`http://localhost:7092/`
+
+**注意**：只要记录数据的`events.out. ...`文件所在的文件夹不变（即 task 和 model 不变），那么就不用关闭网址，只需要刷新网址，即可获得`log/task-1/TestNet`文件夹下的所有可视化数据！
+
 ### 可视化数据集
 使用下列命令来查看命令行参数信息。
 ```bash
@@ -171,3 +179,6 @@ bash visual.sh
   - *v0.5.4*
     - 在`transform.py`中添加旋转的数据增强操作和去除高亮点的数据预处理方法。添加旋转的数据增强操作能够有效避免过拟合！
     - 更新论文
+- *v0.6*
+  - *v0.6.0*
+    - 添加`tensorboard`可视化的支持，具体的可视化文件夹位于`./log`下，使用`tensorboard`的方法在`README.md`中

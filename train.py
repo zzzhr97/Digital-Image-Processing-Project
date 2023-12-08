@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn.functional as F
+from torch.utils.tensorboard import SummaryWriter
 import argparse
 import numpy as np
 import time
@@ -82,6 +83,11 @@ def train(args, seed=123):
         print(f'\tOutput dimension: {args.out_dim} and will use CrossEntropyLoss.')
         loss_fn = utils.cross_entropy_loss
 
+    # tensorboard visualization
+    log_dir = os.path.join('log', f'task-{args.task}', f'{args.model}')
+    os.makedirs(log_dir, exist_ok=True)
+    writer = SummaryWriter(log_dir=log_dir)
+
     # optimizer
     params = net.parameters()
     if args.optimizer == "adam":
@@ -89,7 +95,8 @@ def train(args, seed=123):
     elif args.optimizer == "sgd":
         optimizer = torch.optim.SGD(params, lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
-    best_valid_result = {'Loss': 1e10, 'Kappa': 0.0, 'F1': 0.0, 'Specificity': 0.0, 'Average': 0.0}
+    best_valid_result_loss = {'Loss': 1e10, 'Kappa': 0.0, 'F1': 0.0, 'Specificity': 0.0, 'Average': 0.0}
+    best_valid_result_score = {'Loss': 1e10, 'Kappa': 0.0, 'F1': 0.0, 'Specificity': 0.0, 'Average': 0.0}
     results = []
     losses = []
     start_time = time.time()
@@ -135,6 +142,11 @@ def train(args, seed=123):
             images = torch.stack([x['image'] for x in batch_data])
             labels = torch.tensor([x['label'] for x in batch_data])
 
+            # writer: show images
+            if epoch == 0:
+                current_step = batch_idx
+                writer.add_images(f"Train/Image", images, global_step=current_step, walltime=None, dataformats='NCHW')
+
             # print the input shape of the first batch in the first epoch
             if epoch == 0 and batch_idx == 0:   
                 print(f'\tBatch images shape: {images.shape}')
@@ -172,6 +184,9 @@ def train(args, seed=123):
             if (batch_idx + 1) % args.print_every == 0:
                 print(f'\tEpoch {epoch + 1} || Batch {batch_idx + 1:3} || Loss: {loss.item():.4f}')
 
+                current_step = epoch * n_batches + batch_idx
+                writer.add_scalar("Train_batch/Loss", loss.item(), current_step)
+
         # evaluate the model on the validation set
         if (epoch + 1) % args.eval_every == 0:
             eval_start_time = time.time()
@@ -188,10 +203,15 @@ def train(args, seed=123):
                 f'|| valid TP/TN/FP/FN: {valid_TFPN["TP"]:2}/{valid_TFPN["TN"]:2}/{valid_TFPN["FP"]:2}/{valid_TFPN["FN"]:2}',
             )
             
-            # save the best network weights
-            if valid_scores["Loss"] < best_valid_result["Loss"]:
-                best_valid_result = valid_scores
-                utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best.pth', ckpt_save_path, device)
+            # save the best network weights (best loss)
+            if valid_scores["Loss"] < best_valid_result_loss["Loss"]:
+                best_valid_result_loss = valid_scores
+                utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best_loss.pth', ckpt_save_path, device)
+
+            # save the best network weights (best score)
+            if valid_scores["Average"] > best_valid_result_score["Average"]:
+                best_valid_result_score = valid_scores
+                utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best_score.pth', ckpt_save_path, device)
 
             # save the results
             results.append({
@@ -200,12 +220,31 @@ def train(args, seed=123):
                 'valid_score': valid_scores,
             })
 
+            # visualize
+            current_step = epoch
+            writer.add_scalar("Valid/Average", valid_scores["Average"], current_step)
+            writer.add_scalar("Train/Average", train_scores["Average"], current_step)
+            writer.add_scalar("Train/Loss", train_scores["Loss"], current_step)
+            writer.add_scalar("Valid/Loss", valid_scores["Loss"], current_step)
+            writer.add_scalar("Train/Kappa", train_scores["Kappa"], current_step)
+            writer.add_scalar("Valid/Kappa", valid_scores["Kappa"], current_step)
+            writer.add_scalar("Train/F1", train_scores["F1"], current_step)
+            writer.add_scalar("Valid/F1", valid_scores["F1"], current_step)
+            writer.add_scalar("Train/Specificity", train_scores["Specificity"], current_step)
+            writer.add_scalar("Valid/Specificity", valid_scores["Specificity"], current_step)
+
+
         # save the network weights
         if (epoch + 1) % args.ckpt_every == 0:
             utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_epoch{epoch + 1}.pth', ckpt_save_path, device)
 
+    # close writer of tensorboard
+    writer.close()
+
     # training finished
-    print(f'Best valid score: {best_valid_result}')
+    best_valid_result = best_valid_result_score
+    print(f'Best valid score (best score): {best_valid_result_score}')
+    print(f'Best valid score (best loss): {best_valid_result_loss}')
     print(f'Total time: {time.time() - start_time:.2f}s')
 
     # search the best threshold in validation set for classification

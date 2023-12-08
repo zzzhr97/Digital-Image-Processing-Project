@@ -3,10 +3,10 @@ import torch
 from torch import nn
 
 import transform
-from Net import TestNet
+from Net import SResNet
 
-net = TestNet
-num_classes = 1
+net = SResNet
+num_classes = 2
 ckpt_path = "Net.pth"
 transform_method_origin = 1
 threshold = 0.5
