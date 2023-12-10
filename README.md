@@ -64,7 +64,7 @@ python eval_model.py
 - *在服务器上运行*
   - 在主文件夹中输入命令：`cd log/task-1/TestNet`。
   - 然后输入命令：`tensorboard --logdir ./ --port 6007`。
-  - 在`AutoPannel`中打开`Tensorboard`。
+  - 在`AutoPanel`中打开`Tensorboard`。
 
 **注意**：
 - 在网站中，将右上角设置中的`reload_data`打上勾，可自动刷新网站
