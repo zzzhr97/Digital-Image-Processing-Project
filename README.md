@@ -70,12 +70,14 @@ python eval_model.py
 ```
 
 ### Tensorboard可视化使用方法
-- 在主文件夹中输入命令：`cd log/task-1/TestNet`
-- 然后输入命令：`tensorboard --logdir=./ --port 7092`
-- **若在远程运行**，在**本地**命令行中输入`ssh -L 7092:localhost:7092 user@your_server_ip`，将本地的7092端口和远程服务器的7092端口关联起来（在本地训练时，忽略此步骤）
-- 在**本地**打开命令行出现的网址，即`http://localhost:7092/`
+- 在主文件夹中输入命令：`cd log/task-1/TestNet`。
+- 然后输入命令：`tensorboard --logdir=./ --port 8099`。
+- **若在远程运行**，在**本地**命令行中输入`ssh -L 8099:localhost:8099 user@your_server_ip`，将本地的8099端口和远程服务器的8099端口关联起来（在本地训练时，忽略此步骤）。
+- 在**本地**打开命令行出现的网址，即`http://localhost:8099/`。
 
-**注意**：只要记录数据的`events.out. ...`文件所在的文件夹不变（即 task 和 model 不变），那么就不用关闭网址，只需要刷新网址，即可获得`log/task-1/TestNet`文件夹下的所有可视化数据！
+**注意**：
+- 在网站中，将右上角设置中的`reload_data`打上勾，可自动刷新网站
+- 每次训练时，需要将以前的数据文件`events.out. ...`删除，才能正确加载当前训练的数据。此过程中网站不需要关闭，`tensorboard`设置也不会重置。
 
 ### 可视化数据集
 使用下列命令来查看命令行参数信息。
@@ -182,4 +184,6 @@ bash visual.sh
 - *v0.6*
   - *v0.6.0*
     - 添加`tensorboard`可视化的支持，具体的可视化文件夹位于`./log`下，使用`tensorboard`的方法在`README.md`中
-    - 更改模型参数的保存：在训练时，不仅保存 loss 最小的模型参数，还会保存 average score 最大的模型参数。
+    - 更改模型参数的保存：在训练时，不仅保存 loss 最小的模型参数，还会保存 average score 最大的模型参数
+  - *v0.6.1*
+    - 添加`UNet.py`，添加`report/`文件夹，图片、文件、报告都可以放在这个文件夹下

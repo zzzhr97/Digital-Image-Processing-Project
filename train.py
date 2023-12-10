@@ -143,9 +143,9 @@ def train(args, seed=123):
             labels = torch.tensor([x['label'] for x in batch_data])
 
             # writer: show images
-            if epoch == 0:
-                current_step = batch_idx
-                writer.add_images(f"Train/Image", images, global_step=current_step, walltime=None, dataformats='NCHW')
+            if epoch == 0 and batch_idx == 0:
+                current_step = 0
+                writer.add_images(f"Image", images, global_step=current_step, walltime=None, dataformats='NCHW')
 
             # print the input shape of the first batch in the first epoch
             if epoch == 0 and batch_idx == 0:   
@@ -183,9 +183,6 @@ def train(args, seed=123):
             # print the loss
             if (batch_idx + 1) % args.print_every == 0:
                 print(f'\tEpoch {epoch + 1} || Batch {batch_idx + 1:3} || Loss: {loss.item():.4f}')
-
-                current_step = epoch * n_batches + batch_idx
-                writer.add_scalar("Train_batch/Loss", loss.item(), current_step)
 
         # evaluate the model on the validation set
         if (epoch + 1) % args.eval_every == 0:
