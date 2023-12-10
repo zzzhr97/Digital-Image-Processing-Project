@@ -179,3 +179,4 @@ bash visual.sh
   - *v0.6.1*
     - 添加`UNet.py`，添加`report/`文件夹，图片、文件、报告都可以放在这个文件夹下
     - 添加`requirements.txt`。
+    - 修改`UNet.py`为`AUNet.py`。

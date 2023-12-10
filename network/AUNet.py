@@ -61,9 +61,9 @@ class UpSampleLayer(nn.Module):
         out=torch.cat((out,x_prev),dim=1)
         return out
 
-class UNet(nn.Module):
+class AUNet(nn.Module):
     def __init__(self, in_dim=3, out_dim=3, config=None):
-        super(UNet, self).__init__()
+        super(AUNet, self).__init__()
 
         # downsample
         self.down_layers = nn.ModuleDict() 
@@ -113,19 +113,19 @@ class UNet(nn.Module):
         x = self.output_layer(x)
         return x
     
-def get_UNet(in_dim, out_dim, first_dim, depth):
+def get_AUNet(in_dim, out_dim, first_dim, depth):
     config = [first_dim * 2**i for i in range(depth)]
-    return UNet(in_dim, out_dim, config)
+    return AUNet(in_dim, out_dim, config)
 
-def UNet4(num_classes=2):
+def AUNet4(num_classes=2):
     # 512 -> 256 -> 128 -> 64 -> 128 -> 256 -> 512
-    return get_UNet(3, num_classes, 32, 4)
+    return get_AUNet(3, num_classes, 32, 4)
 
-def UNet5(num_classes=2):
+def AUNet5(num_classes=2):
     # 512 -> 256 -> 128 -> 64 -> 32 -> 64 -> 128 -> 256 -> 512
-    return get_UNet(3, num_classes, 32, 5)
+    return get_AUNet(3, num_classes, 32, 5)
 
-def UNet6(num_classes=2):
+def AUNet6(num_classes=2):
     # 512 -> 256 -> 128 -> 64 -> 32 -> 16 -> 32 -> 64 -> 128 -> 256 -> 512
-    return get_UNet(3, num_classes, 32, 6)
+    return get_AUNet(3, num_classes, 32, 6)
 
