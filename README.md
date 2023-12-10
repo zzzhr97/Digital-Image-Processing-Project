@@ -55,14 +55,20 @@ python eval_model.py
 本项目在`requirements.txt`所示环境中能够运行。
 
 ### Tensorboard可视化使用方法
-- 在主文件夹中输入命令：`cd log/task-1/TestNet`。
-- 然后输入命令：`tensorboard --logdir=./ --port 8099`。
-- **若在远程运行**，在**本地**命令行中输入`ssh -L 8099:localhost:8099 user@your_server_ip`，将本地的8099端口和远程服务器的8099端口关联起来（在本地训练时，忽略此步骤）。
-- 在**本地**打开命令行出现的网址，即`http://localhost:8099/`。
+
+- *在本地运行*
+  - 在主文件夹中输入命令：`cd log/task-1/TestNet`。
+  - 然后输入命令：`tensorboard --logdir ./ --port 8099`。
+  - 在**本地**打开命令行出现的网址，即`http://localhost:8099/`。
+
+- *在服务器上运行*
+  - 在主文件夹中输入命令：`cd log/task-1/TestNet`。
+  - 然后输入命令：`tensorboard --logdir ./ --port 6007`。
+  - 在`AutoPannel`中打开`Tensorboard`。
 
 **注意**：
 - 在网站中，将右上角设置中的`reload_data`打上勾，可自动刷新网站
-- 每次训练时，需要将以前的数据文件`events.out. ...`删除，才能正确加载当前训练的数据。此过程中网站不需要关闭，`tensorboard`设置也不会重置。
+- 每次训练时，需要将以前的数据文件`events.out. ...`删除，按下`Ctrl+C`退出`Tensorboard`进程并重新运行命令，才能正确加载当前训练的数据。此过程中网站不需要关闭，`tensorboard`设置也不会重置。
 
 ### 可视化数据集
 使用下列命令来查看命令行参数信息。
