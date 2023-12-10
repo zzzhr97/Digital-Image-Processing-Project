@@ -51,23 +51,8 @@ python eval_model.py
 4. 每次训练完毕，都会在主文件夹中生成`results.png`用于可视化训练过程。
 5. 神经网络调用时，要求接收一个参数`num_classes`，用于调整最后输出的大小。
 
-### 模拟模型评估步骤
-
-- 打开`model.py`文件，设置参数:
-  - `net`: 存在于`network`文件夹下的模型类名，比如`TestNet`
-  - `num_classes`: 模型最后一层输出的形状，`1`或`2`
-  - `ckpt_path`: 权重文件名，默认为`Net.pth`
-  - `transform_method_origin`: 读取数据时所用的预处理方法编号
-- 设置模型的方法有两种
-  - **方法一** 将`model.py`中的`net`设置成该模型名，如`TestNet`
-  - **方法二** 将`model.py`中的`net`设置成`Net`，然后将想要使用的模型代码复制至`model.py`中的`Net`类中 ***(除了类名为`Net`，其他代码应当和原模型代码一致)***
-- 打开`eval_model.py`文件，设置参数：
-  - `task`: 任务数字，`1`或`2`，默认为`1`
-- 将想要评估的模型权重文件放到主文件夹下，并重命名成第一步设置的`ckpt_path`，默认为`Net.pth`。
-- 运行命令：
-```bash
-python eval_model.py
-```
+### 环境
+本项目在`requirements.txt`所示环境中能够运行。
 
 ### Tensorboard可视化使用方法
 - 在主文件夹中输入命令：`cd log/task-1/TestNet`。
@@ -187,3 +172,4 @@ bash visual.sh
     - 更改模型参数的保存：在训练时，不仅保存 loss 最小的模型参数，还会保存 average score 最大的模型参数
   - *v0.6.1*
     - 添加`UNet.py`，添加`report/`文件夹，图片、文件、报告都可以放在这个文件夹下
+    - 添加`requirements.txt`。
