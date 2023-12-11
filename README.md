@@ -122,6 +122,17 @@ bash visual.sh
 ### 论文
 1. [Classification of Diabetic Retinopathy Images by Using Deep Learning Models](https://www.researchgate.net/publication/322978904_Classification_of_Diabetic_Retinopathy_Images_by_Using_Deep_Learning_Models?enrichId=rgreq-20fcda6f3c75365a3fc74c0264a0fe45-XXX&enrichSource=Y292ZXJQYWdlOzMyMjk3ODkwNDtBUzo2MzczNzgxMDg2MTI2MDhAMTUyODk3NDE5MTM4Mg%3D%3D&el=1_x_3&_esc=publicationCoverPdf) 介绍的一些形态学预处理方法可以借鉴
 2. [HyMNet: a Multimodal Deep Learning System for Hypertension Classification using Fundus Photographs and Cardiometabolic Risk Factors](https://paperswithcode.com/paper/hymnet-a-multimodal-deep-learning-system-for) 需要额外的参数，但是思路可以参考
+3. [Hypertensive Retinopathy Screening through Fundus Images-A Review](https://ieeexplore.ieee.org/document/9358746)
+   
+    综述，提到了一些前人的工作，以及“然而，对于医学影像的筛查，这些结构的分类性能可能也无关紧要。医学图像数据集可能是原因之一，因为特定领域的数据集有限，可能导致模型过度拟合或欠拟合。此外，迁移学习和超参数调优可以在现有数据集和网络上实现，用于特定应用，具有更多的加权参数来提取中间特征。”
+
+    包括以下HR的五大特征(可以考虑进行特征提取)
+![image](https://github.com/zzzhr97/Digital-Image-Processing-Project/assets/91607859/6519707f-3db8-4673-92aa-26c9f2b688ed)
+4. [Machine learning algorithms for hypertensive retinopathy detection through retinal fundus images](https://books.google.com.tw/books?hl=zh-CN&lr=&id=7X9ZEAAAQBAJ&oi=fnd&pg=PT55&dq=hypertension+detection+by+fundus&ots=GUs64sMYYq&sig=6dOdufN-gGPgLE_jSLTihAdIm-0&redir_esc=y#v=onepage&q=hypertension%20detection%20by%20fundus&f=false)
+    介绍了两大HR分类的方法，卷积网络VS机器学习 供参考
+    ![image](https://github.com/zzzhr97/Digital-Image-Processing-Project/assets/91607859/8392b3de-0ac4-467a-925f-f92c91cdef09)
+    ![image](https://github.com/zzzhr97/Digital-Image-Processing-Project/assets/91607859/1548bb24-1eaa-44b8-8b25-9605af9d0fba)
+
 
 ### 数据集
 1. [全球94个开放获取数据库特征——《全球眼科图像公开数据库使用指南（2022）》附表](http://www.ykxjz.com/docs/tzgg/details.aspx?documentid=54&Nid=A967CBAD-BC53-4787-88ED-CD9D9ABAA7DE)
@@ -181,3 +192,6 @@ bash visual.sh
     - 添加`UNet.py`，添加`report/`文件夹，图片、文件、报告都可以放在这个文件夹下
     - 添加`requirements.txt`
     - 修改`UNet.py`为`AUNet.py`
+  - *v0.6.2*
+    - 在`README.md`中更新了两篇文献
+    - 添加`VGGNet`
