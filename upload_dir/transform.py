@@ -53,7 +53,7 @@ class transform_method:
 
     def method_1(self, image):
         # resize image
-        image = cv2.resize(image, (512, 512)) # (800, 800, 3) -> (512, 512, 3)
+        image = cv2.resize(image, (96, 96)) # (800, 800, 3) -> (512, 512, 3)
 
         # convert to tensor
         image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)

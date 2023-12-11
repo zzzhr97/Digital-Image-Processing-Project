@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 import cv2
 import random
+import numpy as np
 
 class transform_method:
     def __init__(self, method=1):
@@ -53,20 +54,18 @@ class transform_method:
 
     def method_1(self, image):
         # resize image
-        image = cv2.resize(image, (512, 512)) # (800, 800, 3) -> (512, 512, 3)
+        image = cv2.resize(image, (96, 96)) # (800, 800, 3) -> (512, 512, 3)
 
         # convert to tensor
         image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
 
         # normalize
-        image = image / 255.0
+        #image = image / 255.0
 
         return image
     
     def method_2(self, image):
         """epoch transform method"""
-        # input shape torch.tensor([3, x, x])
-        assert image.shape[0] == 3, f'Input image must have 3 channels, but got {image.shape[0]} channels.'
 
         # 即0.25的几率进行水平翻转
         # 0.25的几率进行垂直翻转
@@ -87,6 +86,42 @@ class transform_method:
         elif random.random() < 0.75:
             image = transforms.functional.rotate(image, 270)
 
+        return image
+    
+    # canny
+    def method_3(self, image):
+        image = cv2.resize(image, (96, 96))
+
+        threshold1 = 20
+        threshold2 = 100
+        edges = cv2.Canny(image, threshold1, threshold2)
+        image = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGB)
+        image = torch.from_numpy(image).permute(2, 0, 1).float()
+        return image
+    
+    # 锐化
+    def method_4(self, image):
+        image = cv2.resize(image, (96, 96))
+
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        kernel = np.array([[-1, -1, -1],
+                        [-1,  9, -1],
+                        [-1, -1, -1]])
+        image = cv2.filter2D(gray, -1, kernel)
+
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        image = torch.from_numpy(image).permute(2, 0, 1).float()
+        return image
+
+    # 5*5高斯滤波
+    def method_5(self, image):
+        image = cv2.resize(image, (96, 96))
+
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = cv2.GaussianBlur(gray, (5, 5), 0)
+
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        image = torch.from_numpy(image).permute(2, 0, 1).float()
         return image
 
     def method_12(self, image):

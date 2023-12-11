@@ -93,13 +93,14 @@ def main(args):
         pbar.set_postfix_str()
 
 def transform(image):
-    image = cv2.resize(image, (512, 512)) # (800, 800, 3) -> (512, 512, 3)
+    image = cv2.resize(image, (96, 96)) # (800, 800, 3) -> (512, 512, 3)
     image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
 
-    image = test_transform1(image)
+    image = test_transform3(image)
 
     return image
 
+# 边缘检测
 def test_transform1(image):
     threshold1 = 20
     threshold2 = 100
@@ -108,6 +109,33 @@ def test_transform1(image):
     print(new_image.shape)
     #new_image = torch.from_numpy(new_image).unsqueeze(0).float()
     return new_image
+
+# 直方图均衡化
+def test_transform2(image):
+    image = image.permute(1, 2, 0).numpy().astype(np.uint8)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    equalized_image = cv2.equalizeHist(gray)
+    return equalized_image
+
+# 锐化
+def test_transform3(image):
+    image = image.permute(1, 2, 0).numpy().astype(np.uint8)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    kernel = np.array([[-1, -1, -1],
+                    [-1,  9, -1],
+                    [-1, -1, -1]])
+
+    sharpened_image = cv2.filter2D(gray, -1, kernel)
+    return sharpened_image
+
+# 5*5高斯滤波
+def test_transform4(image):
+    image = image.permute(1, 2, 0).numpy().astype(np.uint8)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    blurred_image = cv2.GaussianBlur(gray, (5, 5), 0)
+    return blurred_image
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Visualize the dataset.')

@@ -3,10 +3,11 @@ import torch
 from torch import nn
 
 import transform
-from Net import SResNet
+from Net import DenseNet
 
-net = SResNet
+net = DenseNet
 num_classes = 2
+in_channel = 3
 ckpt_path = "Net.pth"
 transform_method_origin = 1
 threshold = 0.5
@@ -26,7 +27,7 @@ class model:
         :param dir_path: path to the submission directory (for internal use only).
         :return:
         """
-        self.model = net(num_classes=num_classes)
+        self.model = net(num_classes=num_classes, in_channel=in_channel)
         # join paths
         checkpoint_path = os.path.join(dir_path, self.checkpoint)
         self.model.load_state_dict(torch.load(checkpoint_path, map_location=self.device))
