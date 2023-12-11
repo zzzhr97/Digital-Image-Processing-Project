@@ -179,5 +179,5 @@ bash visual.sh
     - 更改模型参数的保存：在训练时，不仅保存 loss 最小的模型参数，还会保存 average score 最大的模型参数
   - *v0.6.1*
     - 添加`UNet.py`，添加`report/`文件夹，图片、文件、报告都可以放在这个文件夹下
-    - 添加`requirements.txt`。
-    - 修改`UNet.py`为`AUNet.py`。
+    - 添加`requirements.txt`
+    - 修改`UNet.py`为`AUNet.py`
