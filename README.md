@@ -63,6 +63,7 @@ python eval_model.py
 
 - *在服务器上运行*
   - 在主文件夹中输入命令：`cd log/task-1/TestNet`。
+  - 因为默认使用`/root/tf-logs`作为`logdir`，所以需要执行命令`ps -ef | grep tensorboard | awk '{print $2}' | xargs kill -9`删除该进程。
   - 然后输入命令：`tensorboard --logdir ./ --port 6007`。
   - 在`AutoPanel`中打开`Tensorboard`。
 
