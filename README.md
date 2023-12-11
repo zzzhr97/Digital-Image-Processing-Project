@@ -194,4 +194,3 @@ bash visual.sh
     - 修改`UNet.py`为`AUNet.py`
   - *v0.6.2*
     - 在`README.md`中更新了两篇文献
-    - 添加`VGGNet`
