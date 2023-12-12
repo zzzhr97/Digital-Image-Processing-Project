@@ -1,5 +1,3 @@
-[TOC]
-
 # Digital-Image-Processing-Project
 **数字图像处理 project：高血压视网膜病变图像的分类**
 
