@@ -141,7 +141,7 @@ FusionPath负责综合上述两个模态
 
 ![](report/image/HyMNet.png)
 
-4. [Hypertensive Retinopathy Screening through Fundus Images-A Review](https://ieeexplore.ieee.org/document/9358746)
+3. [Hypertensive Retinopathy Screening through Fundus Images-A Review](https://ieeexplore.ieee.org/document/9358746)
    
 综述，提到了一些前人的工作，以及“然而，对于医学影像的筛查，这些结构的分类性能可能也无关紧要。医学图像数据集可能是原因之一，因为特定领域的数据集有限，可能导致模型过度拟合或欠拟合。此外，迁移学习和超参数调优可以在现有数据集和网络上实现，用于特定应用，具有更多的加权参数来提取中间特征。”
 
