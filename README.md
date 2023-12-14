@@ -223,3 +223,4 @@ FusionPath负责综合上述两个模态
     net = getattr(network, args.model)(num_classes=args.out_dim, in_channel=in_channel)
     ```
     - `visual.py`加入测试`transform`的功能，并增加调节生成图片个数的命令行参数
+    - `transform.py`增加新的预处理功能，`method_3/4/5`
