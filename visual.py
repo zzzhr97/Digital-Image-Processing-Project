@@ -5,13 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 import cv2
+import torch
 
 from data import load_data
 
 def save_batch_image(batch_data, save_path, is_show, batch_height=2, batch_width=5):
     """Save a batch of images and labels to a figure."""
-    image_height, image_width = batch_data[0]['image'].shape[:2]
-    assert image_height == 800 and image_width == 800, f'Image size must be 800x800, but got {image_height}x{image_width}.'
 
     # create subplots
     fig, axs = plt.subplots(batch_height, batch_width, figsize=(batch_width * 2, batch_height * 2))
@@ -45,14 +44,24 @@ def main(args):
     print("Loading data...", end=' ')
     _, total_data, _ = load_data(args, 0, seed=123)
     print("Done.")
-    print("Number of samples:", len(total_data))
+
+    batch_num = args.batch_num
+    if batch_num > len(total_data) // (args.batch_height * args.batch_width):
+        batch_num = len(total_data) // (args.batch_height * args.batch_width)
+        print(f"Warning: batch_num is too large, reset to {batch_num}")
+
+    n_samples = batch_num * args.batch_height * args.batch_width
+    print("Number of samples:", n_samples)
 
     # processing data: convert BGR to RGB
     print("Processing data...", end=' ')
-    with tqdm(total=len(total_data), desc="Processing", unit="sample") as pbar:
+    with tqdm(total=n_samples, desc="Processing", unit="sample") as pbar:
         for idx, sample in enumerate(total_data):
+            if idx >= n_samples:
+                break
+
             # convert BGR to RGB
-            total_data[idx]['image'] = cv2.cvtColor(total_data[idx]['image'], cv2.COLOR_BGR2RGB)
+            total_data[idx]['image'] = transform(total_data[idx]['image'])
 
             pbar.update(1)
             pbar.set_postfix_str(f"Processing {idx:03d}-th sample")
@@ -64,7 +73,7 @@ def main(args):
 
     # set number of batches, the last batch will be dropped if its size is not equal to batch_size
     batch_size = args.batch_height * args.batch_width
-    n_batches = len(total_data) // batch_size
+    n_batches = batch_num
 
     # save and show images
     with tqdm(total=n_batches, desc="Generating", unit="batch") as pbar:
@@ -83,6 +92,23 @@ def main(args):
         pbar.set_description("Generating done")
         pbar.set_postfix_str()
 
+def transform(image):
+    image = cv2.resize(image, (512, 512)) # (800, 800, 3) -> (512, 512, 3)
+    image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
+
+    image = test_transform1(image)
+
+    return image
+
+def test_transform1(image):
+    threshold1 = 20
+    threshold2 = 100
+    new_image = image.permute(1, 2, 0).numpy().astype(np.uint8)
+    new_image = cv2.Canny(new_image, threshold1, threshold2)
+    print(new_image.shape)
+    #new_image = torch.from_numpy(new_image).unsqueeze(0).float()
+    return new_image
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Visualize the dataset.')
 
@@ -93,6 +119,7 @@ if __name__ == '__main__':
     parser.add_argument('--begin_idx', type=int, default=0, help='begin index')
     parser.add_argument('--batch_height', type=int, default=2, help='the height of the figure (unit: image)')
     parser.add_argument('--batch_width', type=int, default=5, help='the width of the figure (unit: image)')
+    parser.add_argument('--batch_num', type=int, default=1, help='the number of batches to visualize')
 
     args = parser.parse_args()
     setattr(args, 'is_shuffle', False)

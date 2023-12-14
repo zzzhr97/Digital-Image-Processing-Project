@@ -66,7 +66,8 @@ def train(args, seed=123):
 
     # init model
     # example: if args.model == 'ResNet34', then net = network.ResNet34()
-    net = getattr(network, args.model)(num_classes=args.out_dim)
+    in_channel = train_data[0]['image'].shape[0]
+    net = getattr(network, args.model)(num_classes=args.out_dim, in_channel=in_channel)
     net = net.to(device)
 
     if args.out_dim == 1: 
@@ -143,8 +144,8 @@ def train(args, seed=123):
             labels = torch.tensor([x['label'] for x in batch_data])
 
             # writer: show images
-            if epoch == 0 and batch_idx == 0:
-                current_step = 0
+            if epoch == 0:
+                current_step = batch_idx
                 writer.add_images(f"Image", images, global_step=current_step, walltime=None, dataformats='NCHW')
 
             # print the input shape of the first batch in the first epoch

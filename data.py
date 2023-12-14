@@ -102,7 +102,10 @@ class hyper_dataset(Dataset):
     def load_labels(self, label_file):
         """Returns a dictionary of labels from a csv file."""
         label_df = pd.read_csv(label_file)
-        self.labels = {row['Image']: row['Hypertensive'] for _, row in label_df.iterrows()}
+        if self.task == 1:
+            self.labels = {row['Image']: row['Hypertensive'] for _, row in label_df.iterrows()}
+        if self.task == 2:
+            self.labels = {row['Image']: row['Hypertensive Retinopathy'] for _, row in label_df.iterrows()}
     
     def get_data(self):
         """

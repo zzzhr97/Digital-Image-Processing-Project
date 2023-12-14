@@ -194,3 +194,12 @@ bash visual.sh
     - 修改`UNet.py`为`AUNet.py`
   - *v0.6.2*
     - 在`README.md`中更新了两篇文献
+    - 添加`VGGNet`
+  - *v0.6.3*
+    - 让`train.py`和`data.py`支持task2的数据集读取和训练
+    - `train.py`使用模型时，加入`in_channel`的传入参数，具体为：
+    ``` python
+    in_channel = train_data[0]['image'].shape[0]
+    net = getattr(network, args.model)(num_classes=args.out_dim, in_channel=in_channel)
+    ```
+    - `visual.py`加入测试`transform`的功能，并增加调节生成图片个数的命令行参数
