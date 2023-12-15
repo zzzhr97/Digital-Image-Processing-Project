@@ -53,9 +53,11 @@ def train(args, seed=123):
 
     # path to save checkpoints
     ckpt_save_path = os.path.join(args.ckpt_dir, f'task-{args.task}', f'{args.model}')
+    ckpt_load_path = os.path.join(args.ckpt_load_dir, f'{args.model}')
     result_save_path = os.path.join(args.result_dir, f'task-{args.task}', f'{args.model}')
     os.makedirs(ckpt_save_path, exist_ok=True)
     os.makedirs(result_save_path, exist_ok=True)
+    os.makedirs(ckpt_load_path, exist_ok=True)
 
     # set device
     if args.device == 'cuda':
@@ -67,8 +69,15 @@ def train(args, seed=123):
     # init model
     # example: if args.model == 'ResNet34', then net = network.ResNet34()
     in_channel = train_data[0]['image'].shape[0]
-    net = getattr(network, args.model)(num_classes=args.out_dim, in_channel=in_channel)
+    net = getattr(network, args.model)(
+        num_classes=args.out_dim, 
+        in_channel=in_channel, 
+        pretrained=(args.pretrained == 1)
+    )
     net = net.to(device)
+
+    if args.pretrained == 2:
+        utils.load_checkpoint(net, f'{args.ckpt_load_name}.pth', ckpt_load_path, device)
 
     if args.out_dim == 1: 
         # calculate the fraction of (<nagetive labels number> / <positive labels number>)
@@ -306,6 +315,11 @@ if __name__ == '__main__':
     parser.add_argument('--ckpt_every', type=int, default=25, help='epochs between checkpoint save')
     parser.add_argument('--eval_every', type=int, default=5, help='epochs between evaluation on validation set')
     parser.add_argument('--print_every', type=int, default=2, help='batches between print in each epoch')
+
+    # pretrain parameters
+    parser.add_argument('--pretrained', type=int, choices=[0, 1, 2], default=0, help='whether to use pretrained model')
+    parser.add_argument('--ckpt_load_dir', type=str, default='checkpoints_load', help='path to loaded checkpoints')
+    parser.add_argument('--ckpt_load_name', type=str, default='ResNet34', help='name of loaded checkpoints')
 
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     args = parser.parse_args()

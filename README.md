@@ -29,19 +29,20 @@ python eval_model.py
 2. `./network/` 网络模型
 3. `./results/` 训练后生成，保存训练结果的`.csv`文件，**不会上传至github，需要另外保存**
 4. `./checkpoints/` 训练后生成，保存训练时的模型参数，为`.pth`文件，**不会上传至github，需要另外保存**
-5. `./upload_dir/` 用于测试和提交模型的文件夹
-6. `data.py` 数据读取和处理
-7. `transform.py` 数据预处理
-8. `utils.py` 包含了一些功能型函数
-9. `train.py` 训练模型
-10. `train.bat` *windows* 运行脚本
-11. `train.sh` *linux* 运行脚本
-12. `model.py` 用于在测试集上评估模型的模型文件
-13. `eval_model.py` 模拟在测试集上对模型进行评估（实际使用了训练集）
-14. `./visual/` 用于存放数据集可视化之后的图片，**不会上传至github，需要另外保存**
-15. `visual.py` 用于批量可视化数据集
-16. `visual.bat` 运行`visual.py`的*windows*脚本
-17. `visual.sh` 运行`visual.py`的*linux*脚本
+5. `./checkpoints_load/` 训练一次后生成，用于放入训练前加载的模型参数文件，**不会上传至github**
+6. `./upload_dir/` 用于测试和提交模型的文件夹
+7. `data.py` 数据读取和处理
+8. `transform.py` 数据预处理
+9. `utils.py` 包含了一些功能型函数
+10. `train.py` 训练模型
+11. `train.bat` *windows* 运行脚本
+12. `train.sh` *linux* 运行脚本
+13. `model.py` 用于在测试集上评估模型的模型文件
+14. `eval_model.py` 模拟在测试集上对模型进行评估（实际使用了训练集）
+15. `./visual/` 用于存放数据集可视化之后的图片，**不会上传至github，需要另外保存**
+16. `visual.py` 用于批量可视化数据集
+17. `visual.bat` 运行`visual.py`的*windows*脚本
+18. `visual.sh` 运行`visual.py`的*linux*脚本
 
 ### 注意事项
 
@@ -115,6 +116,13 @@ bash visual.sh
   - `ckpt_every`: 每多少个epoch保存一次模型权重
   - `eval_every`: 每多少个epoch进行一次训练集和验证集loss和score的评估，打印并保存到results中
   - `print_every`: 每个epoch中，每多少个batch进行一次训练集上loss的打印
+- *pretrain parameters*:
+  - `pretrained`: 
+    - 为`0`表示不进行预训练
+    - 为`1`表示在声明模型时，传入参数`pretrained=True`，否则`pretrained=False`
+    - 为`2`表示加载`ckpt_load_dir/model/ckpt_load_name.pth`模型参数文件 (如`checkpoint_load/resnet18/pre.pth`)
+  - `ckpt_load_dir`: 用于加载模型参数的文件夹
+  - `ckpt_load_name`: 用于加载的模型参数文件名
 
 ### 预处理
 1. xxx
@@ -225,3 +233,6 @@ FusionPath负责综合上述两个模态
     - `visual.py`加入测试`transform`的功能，并增加调节生成图片个数的命令行参数
     - `transform.py`增加新的预处理功能，`method_3/4/5`
     - `DenseNet.py`新增4个不同深度的网络结构，也可自己改动
+  - *v0.7.0*
+    - 添加新的命令行参数，用于加载预训练模型，具体解释请见命令行参数部分
+    - 修改*resnet18/34/50/101*的相关代码，用于加载官方预训练模型

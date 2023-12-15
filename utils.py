@@ -35,7 +35,7 @@ def load_checkpoint(net, file_name, load_path, device):
     ckpt_dict = torch.load(os.path.join(load_path, file_name), map_location=device)
     net.load_state_dict(ckpt_dict)
 
-    print(f'\tCheckpoint loaded to {file_name}')
+    print(f'\tCheckpoint loaded from {file_name}')
 
 def visualize_results(results, best_valid_result):
     """visualize the results."""

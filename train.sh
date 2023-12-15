@@ -30,4 +30,8 @@ python train.py \
 --result_dir results \
 --ckpt_every 10 \
 --eval_every 1 \
---print_every 2
+--print_every 2 \
+\
+--pretrained 0 \
+--ckpt_load_dir checkpoints_load \
+--ckpt_load_name resnet_pretrain \

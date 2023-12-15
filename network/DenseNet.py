@@ -95,16 +95,16 @@ class DenseNet(nn.Module):
         return x
     
 
-def DenseNet1(in_channel=3, num_classes=2):
+def DenseNet1(in_channel=3, num_classes=2, pretrained=False):
     return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_1)
 
-def DenseNet2(in_channel=3, num_classes=2):
+def DenseNet2(in_channel=3, num_classes=2, pretrained=False):
     return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_2)
 
-def DenseNet3(in_channel=3, num_classes=2):
+def DenseNet3(in_channel=3, num_classes=2, pretrained=False):
     return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_3)
 
-def DenseNet4(in_channel=3, num_classes=2):
+def DenseNet4(in_channel=3, num_classes=2, pretrained=False):
     return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_4)
 
 def get_acc(output, label):
