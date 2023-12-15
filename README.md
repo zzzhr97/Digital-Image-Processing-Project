@@ -47,10 +47,14 @@ python eval_model.py
 ### 注意事项
 
 1. 运行前，先将数据集放在`./dataset`文件夹下，如`./dataset/1-Hypertensive Classification`，以及`./dataset/2-Hypertensive Retinopathy Classification`。
-2. 最终保存下来的`.pth`模型权重文件位于`./checkpoints`文件夹中。`./checkpoints`文件夹不会被上传至github，需要另外保存。
-3. 结果数据保存在`./results/`中，该文件夹不会被上传至github，需要另外保存。
-4. 每次训练完毕，都会在主文件夹中生成`results.png`用于可视化训练过程。
-5. 神经网络调用时，要求接收一个参数`num_classes`，用于调整最后输出的大小。
+2. 运行一次后，才会生成`checkpoint_load`文件夹，也可以自行创建该文件夹。
+3. 最终保存下来的`.pth`模型权重文件位于`./checkpoints`文件夹中。`./checkpoints`文件夹不会被上传至github，需要另外保存。
+4. 结果数据保存在`./results/`中，该文件夹不会被上传至github，需要另外保存。
+5. 每次训练完毕，都会在主文件夹中生成`results.png`用于可视化训练过程。
+6. 神经网络调用时，要求接收三个参数:
+   - `num_classes`，最后输出的大小
+   - `in_channel`，输入数据的深度
+   - `pretrained`，是否预训练
 
 ### 环境
 本项目在`requirements.txt`所示环境中能够运行。
