@@ -202,7 +202,9 @@ def resnet18(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     # https://download.pytorch.org/models/resnet34-333f7ec4.pth
     if pretrained:
         weights = models.ResNet18_Weights.DEFAULT
-        return models.resnet18(weights=weights)
+        model = models.resnet18(weights=weights)
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        return model
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes, in_channel=in_channel, include_top=include_top)
 
 # 34层的resnet
@@ -210,7 +212,9 @@ def resnet34(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     # https://download.pytorch.org/models/resnet34-333f7ec4.pth
     if pretrained:
         weights = models.ResNet34_Weights.IMAGENET1K_V1
-        return models.resnet34(weights=weights)
+        model = models.resnet34(weights=weights)
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        return model
     return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes, in_channel=in_channel, include_top=include_top)
 
 
@@ -219,7 +223,9 @@ def resnet50(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     # https://download.pytorch.org/models/resnet50-19c8e357.pth
     if pretrained:
         weights = models.ResNet50_Weights.IMAGENET1K_V2
-        return models.resnet50(weights=weights)
+        model = models.resnet50(weights=weights)
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        return model
     return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes, in_channel=in_channel, include_top=include_top)
 
 
@@ -228,5 +234,7 @@ def resnet101(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     # https://download.pytorch.org/models/resnet101-5d3b4d8f.pth
     if pretrained:
         weights = models.ResNet101_Weights.DEFAULT
-        return models.resnet101(weights=weights)
+        model = models.resnet101(weights=weights)
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        return model
     return ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes, in_channel=in_channel, include_top=include_top)
