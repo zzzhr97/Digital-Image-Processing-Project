@@ -5,6 +5,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 import pandas as pd
+from torch.utils.tensorboard import SummaryWriter
 
 import transform as tr
 
@@ -104,6 +105,45 @@ def save_results(args, results, file_name, save_path):
     df.to_csv(os.path.join(save_path, file_name), index=False)
 
     print(f'\tResults saved to {file_name}')
+
+def restore_results(result_path):
+    """Generate a result list by a .csv file """
+    df = pd.read_csv(result_path)
+    n_epochs = int(df[df['param'] == 'n_epochs']['value'].values[0])
+
+    selected_columns = df.columns[:-2]
+    original_result = df[selected_columns].to_dict('records')[:n_epochs]
+
+    new_result = []
+    for original_dict in original_result:
+        new_dict = {}
+        for key, value in original_dict.items():
+            keys = key.split('.')
+            current_dict = new_dict
+
+            for k in keys[:-1]:
+                current_dict = current_dict.setdefault(k, {})
+            current_dict[keys[-1]] = value
+
+        new_result.append(new_dict)
+    return new_result
+
+def save_results_with_writer(result, save_path):
+    """Save the results to a tensorboard file."""
+    writer = SummaryWriter(save_path)
+    for i, epoch_result in enumerate(result):
+        writer.add_scalar('1.Average/train', epoch_result['train_score']['Average'], i+1)
+        writer.add_scalar('1.Average/valid', epoch_result['valid_score']['Average'], i+1)
+        writer.add_scalar('2.Loss/train', epoch_result['train_score']['Loss'], i+1)
+        writer.add_scalar('2.Loss/valid', epoch_result['valid_score']['Loss'], i+1)
+        writer.add_scalar('3.Kappa/train', epoch_result['train_score']['Kappa'], i+1)
+        writer.add_scalar('3.Kappa/valid', epoch_result['valid_score']['Kappa'], i+1)
+        writer.add_scalar('4.F1/train', epoch_result['train_score']['F1'], i+1)
+        writer.add_scalar('4.F1/valid', epoch_result['valid_score']['F1'], i+1)
+        writer.add_scalar('5.Specificity/train', epoch_result['train_score']['Specificity'], i+1)
+        writer.add_scalar('5.Specificity/valid', epoch_result['valid_score']['Specificity'], i+1)
+
+    writer.close()
 
 def eval(net, train_data, valid_data, threshold, loss_fn, out_dim, device):
     """

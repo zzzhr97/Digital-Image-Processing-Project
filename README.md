@@ -43,6 +43,7 @@ python eval_model.py
 16. `visual.py` 用于批量可视化数据集
 17. `visual.bat` 运行`visual.py`的*windows*脚本
 18. `visual.sh` 运行`visual.py`的*linux*脚本
+19. `show_result.py` 用于可视化给定`.csv`文件的脚本
 
 ## 注意事项
 
@@ -75,6 +76,24 @@ python eval_model.py
 **注意**：
 - 在网站中，将右上角设置中的`reload_data`打上勾，可自动刷新网站
 - 每次训练时，需要将以前的数据文件`events.out. ...`删除，按下`Ctrl+C`退出`Tensorboard`进程并重新运行命令，才能正确加载当前训练的数据。此过程中网站不需要关闭，`tensorboard`设置也不会重置。
+
+## 可视化`.csv`文件
+- 将`.csv`文件放到对应文件夹下，有2种选择：
+  - **选择1**：例如`./results/task-1/ResNet50/lr1e-6_bs4_epochs150_seed1.csv`
+  - **选择2**：例如`./lr1e-6_bs4_epochs150_seed1.csv`
+- 然后进入`show_result.py`文件，修改以下参数：
+  - `is_from_dir`
+    - 若为`True`，从**选择1**获取文件
+    - 若为`False`，从**选择2**获取文件
+  - `save_path`
+    - 保存生成的tensorboard文件的文件夹，默认为`./log/tmp`
+  - `result_name`
+    - `.csv`文件名，如`r1e-6_bs4_epochs150_seed1`
+  - `result_task`
+    - 仅**选择1**需要的任务数
+  - `result_net`
+    - 仅**选择1**需要的网络模型名
+- 最终会在主文件夹下生成`results.png`，并在`save_path`下生成tensorboard文件
 
 ## 可视化数据集
 使用下列命令来查看命令行参数信息。
@@ -243,3 +262,7 @@ FusionPath负责综合上述两个模态
     - 修改*resnet18/34/50/101*的相关代码，用于加载官方预训练模型
     - 现在的模型都要求有三个传入参数了: `num_classes`, `in_channel`, `pretrained`
     - 修改*ResNet18/34/50/101*为`pytorch`自带模型，*resnet18/34/50/101*为自己定义的模型
+  - *v0.7.1*
+    - 添加`show_result.py`文件，对给定的`.csv`文件进行可视化
+    - 修改`tensorboard`可视化相关代码，使之更加清晰，并且`step`从`1`开始索引，以保证`step = epoch`
+    - 在`README.md`中添加可视化`.csv`文件的指引

@@ -14,3 +14,4 @@ upload_dir/Net.pth
 log/
 my/
 checkpoints_load/
+*.csv

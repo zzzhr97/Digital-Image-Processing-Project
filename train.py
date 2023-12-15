@@ -228,17 +228,17 @@ def train(args, seed=123):
             })
 
             # visualize
-            current_step = epoch
-            writer.add_scalar("Valid/Average", valid_scores["Average"], current_step)
-            writer.add_scalar("Train/Average", train_scores["Average"], current_step)
-            writer.add_scalar("Train/Loss", train_scores["Loss"], current_step)
-            writer.add_scalar("Valid/Loss", valid_scores["Loss"], current_step)
-            writer.add_scalar("Train/Kappa", train_scores["Kappa"], current_step)
-            writer.add_scalar("Valid/Kappa", valid_scores["Kappa"], current_step)
-            writer.add_scalar("Train/F1", train_scores["F1"], current_step)
-            writer.add_scalar("Valid/F1", valid_scores["F1"], current_step)
-            writer.add_scalar("Train/Specificity", train_scores["Specificity"], current_step)
-            writer.add_scalar("Valid/Specificity", valid_scores["Specificity"], current_step)
+            current_step = epoch + 1
+            writer.add_scalar("1.Average/Valid", valid_scores["Average"], current_step)
+            writer.add_scalar("1.Average/Train", train_scores["Average"], current_step)
+            writer.add_scalar("2.Loss/Train", train_scores["Loss"], current_step)
+            writer.add_scalar("2.Loss/Valid", valid_scores["Loss"], current_step)
+            writer.add_scalar("3.Kappa/Train", train_scores["Kappa"], current_step)
+            writer.add_scalar("3.Kappa/Valid", valid_scores["Kappa"], current_step)
+            writer.add_scalar("4.F1/Train", train_scores["F1"], current_step)
+            writer.add_scalar("4.F1/Valid", valid_scores["F1"], current_step)
+            writer.add_scalar("5.Specificity/Train", train_scores["Specificity"], current_step)
+            writer.add_scalar("5.Specificity/Valid", valid_scores["Specificity"], current_step)
 
 
         # save the network weights
