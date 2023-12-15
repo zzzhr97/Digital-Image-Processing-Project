@@ -198,43 +198,47 @@ class ResNet(nn.Module):
 # ResNet()中blocks_num[0-3]对应[3, 4, 6, 3]，表示残差模块中的残差数
 
 # 18层的resnet
-def resnet18(num_classes=1, in_channel=3, pretrained=False, include_top=True):
+def ResNet18(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     # https://download.pytorch.org/models/resnet34-333f7ec4.pth
-    if pretrained:
-        weights = models.ResNet18_Weights.DEFAULT
-        model = models.resnet18(weights=weights)
-        model.fc = nn.Linear(model.fc.in_features, num_classes)
-        return model
+    weights = models.ResNet18_Weights.DEFAULT if pretrained else None
+    model = models.resnet18(weights=weights)
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    return model
+
+def resnet18(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes, in_channel=in_channel, include_top=include_top)
 
 # 34层的resnet
-def resnet34(num_classes=1, in_channel=3, pretrained=False, include_top=True):
+def ResNet34(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     # https://download.pytorch.org/models/resnet34-333f7ec4.pth
-    if pretrained:
-        weights = models.ResNet34_Weights.IMAGENET1K_V1
-        model = models.resnet34(weights=weights)
-        model.fc = nn.Linear(model.fc.in_features, num_classes)
-        return model
+    weights = models.ResNet34_Weights.IMAGENET1K_V1 if pretrained else None
+    model = models.resnet34(weights=weights)
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    return model
+    
+def resnet34(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes, in_channel=in_channel, include_top=include_top)
 
 
 # 50层的resnet
-def resnet50(num_classes=1, in_channel=3, pretrained=False, include_top=True):
+def ResNet50(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     # https://download.pytorch.org/models/resnet50-19c8e357.pth
-    if pretrained:
-        weights = models.ResNet50_Weights.IMAGENET1K_V2
-        model = models.resnet50(weights=weights)
-        model.fc = nn.Linear(model.fc.in_features, num_classes)
-        return model
+    weights = models.ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
+    model = models.resnet50(weights=weights)
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    return model
+    
+def resnet50(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes, in_channel=in_channel, include_top=include_top)
 
 
 # 101层的resnet
-def resnet101(num_classes=1, in_channel=3, pretrained=False, include_top=True):
+def ResNet101(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     # https://download.pytorch.org/models/resnet101-5d3b4d8f.pth
-    if pretrained:
-        weights = models.ResNet101_Weights.DEFAULT
-        model = models.resnet101(weights=weights)
-        model.fc = nn.Linear(model.fc.in_features, num_classes)
-        return model
+    weights = models.ResNet101_Weights.DEFAULT if pretrained else None
+    model = models.resnet101(weights=weights)
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    return model
+    
+def resnet101(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     return ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes, in_channel=in_channel, include_top=include_top)
