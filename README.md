@@ -1,9 +1,9 @@
 # Digital-Image-Processing-Project
 **数字图像处理 project：高血压视网膜病变图像的分类**
 
-### 评估并上传模型步骤
+## 评估并上传模型步骤
 
-#### *务必在 `upload_dir` 中运行 `eval_model.py` ，得到合适的结果之后再提交！*
+> *务必在 `upload_dir` 中运行 `eval_model.py` ，得到合适的结果之后再提交！*
 - 由于`transform.py`可能不同，**将自己的`transform.py`替换掉`upload_dir/transform.py`文件**
 - 将模型权重文件复制到`upload_dir`下，并改名成`Net.pth`
 - 将网络定义文件复制到`upload_dir`下，并改名成`Net.py`
@@ -23,7 +23,7 @@ python eval_model.py
 - 打开[提交网站](https://codalab.lisn.upsaclay.fr/competitions/11877#participate)
 - 在 **Particapate** 中的 **Submit / View Results** 板块下，点击 **Future Test Phase - Task 1** ，进行提交（如果是task2，就选择 **Future Test Phase - Task 2**)
 
-### 文件结构
+## 文件结构
 
 1. `./dataset/` 数据集，**需要在本地放置数据集**
 2. `./network/` 网络模型
@@ -44,7 +44,7 @@ python eval_model.py
 17. `visual.bat` 运行`visual.py`的*windows*脚本
 18. `visual.sh` 运行`visual.py`的*linux*脚本
 
-### 注意事项
+## 注意事项
 
 1. 运行前，先将数据集放在`./dataset`文件夹下，如`./dataset/1-Hypertensive Classification`，以及`./dataset/2-Hypertensive Retinopathy Classification`。
 2. 运行一次后，才会生成`checkpoint_load`文件夹，也可以自行创建该文件夹。
@@ -56,10 +56,10 @@ python eval_model.py
    - `in_channel`，输入数据的深度
    - `pretrained`，是否预训练
 
-### 环境
+## 环境
 本项目在`requirements.txt`所示环境中能够运行。
 
-### Tensorboard可视化使用方法
+## Tensorboard可视化使用方法
 
 - *在本地运行*
   - 在主文件夹中输入命令：`cd log/task-1/TestNet`。
@@ -76,7 +76,7 @@ python eval_model.py
 - 在网站中，将右上角设置中的`reload_data`打上勾，可自动刷新网站
 - 每次训练时，需要将以前的数据文件`events.out. ...`删除，按下`Ctrl+C`退出`Tensorboard`进程并重新运行命令，才能正确加载当前训练的数据。此过程中网站不需要关闭，`tensorboard`设置也不会重置。
 
-### 可视化数据集
+## 可视化数据集
 使用下列命令来查看命令行参数信息。
 ```bash
 python visual.py -h
@@ -88,7 +88,7 @@ visual.bat
 bash visual.sh
 ```
 
-### 命令行参数
+## 命令行参数
 - *base parameters*:
   - `task`: 任务数字，`1`或`2`
   - `seed`: 随机种子编号。在超参数不变的情况下，seed设置相同，那么结果就会一模一样，如果seed设置不同，结果就会不同
@@ -128,7 +128,7 @@ bash visual.sh
   - `ckpt_load_dir`: 用于加载模型参数的文件夹
   - `ckpt_load_name`: 用于加载的模型参数文件名
 
-### 预处理
+## 预处理
 1. xxx
 
 ## 论文
@@ -169,7 +169,7 @@ FusionPath负责综合上述两个模态
 ## 数据集
 1. [全球94个开放获取数据库特征——《全球眼科图像公开数据库使用指南（2022）》附表](http://www.ykxjz.com/docs/tzgg/details.aspx?documentid=54&Nid=A967CBAD-BC53-4787-88ED-CD9D9ABAA7DE)
 
-### 记录
+## 记录
 
 - *v0.1*
   - *v0.1.0* 
