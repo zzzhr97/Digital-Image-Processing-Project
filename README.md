@@ -224,3 +224,4 @@ FusionPath负责综合上述两个模态
     ```
     - `visual.py`加入测试`transform`的功能，并增加调节生成图片个数的命令行参数
     - `transform.py`增加新的预处理功能，`method_3/4/5`
+    - `DenseNet.py`新增4个不同深度的网络结构，也可自己改动

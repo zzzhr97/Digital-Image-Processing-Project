@@ -7,7 +7,12 @@ from torch.autograd import Variable
 from torchvision.datasets import CIFAR10
 import torchvision
 from datetime import datetime
- 
+
+BLOCK_LAYERS_1 = [6, 12, 24, 16] # DenseNet-121
+BLOCK_LAYERS_2 = [6, 12, 32, 32] # DenseNet-169
+BLOCK_LAYERS_3 = [6, 12, 48, 32] # DenseNet-201
+BLOCK_LAYERS_4 = [6, 12, 36, 24] # DenseNet-161
+
 def conv_block(in_channel, out_channel):
     layer = nn.Sequential(
         nn.BatchNorm2d(in_channel),
@@ -15,8 +20,8 @@ def conv_block(in_channel, out_channel):
         nn.Conv2d(in_channel, out_channel, kernel_size=3, padding=1, bias=False)
     )
     return layer
- 
- 
+
+
 # 稠密块由多个conv_block 组成，每块使⽤用相同的输出通道数。但在前向计算时，我们将每块的输入和输出在通道维上连结。
 class dense_block(nn.Module):
     def __init__(self, in_channel, growth_rate, num_layers):
@@ -29,13 +34,13 @@ class dense_block(nn.Module):
             )
             channel += growth_rate
             self.net = nn.Sequential(*block)
- 
+
     def forward(self, x):
         for layer in self.net:
             out = layer(x)
             x = torch.cat((out, x), dim=1)
         return x
- 
+
 if __name__ == '__main__':  
     blk = dense_block(in_channel=3, growth_rate=10, num_layers=4)
     X = torch.rand(4, 3, 8, 8)
@@ -59,7 +64,7 @@ if __name__ == '__main__':
  
  
 class DenseNet(nn.Module):
-    def __init__(self, in_channel=3, num_classes=2, growth_rate=32, block_layers=[6, 12, 24, 16]):
+    def __init__(self, in_channel=3, num_classes=2, growth_rate=32, block_layers=BLOCK_LAYERS_1):
         super(DenseNet, self).__init__()
         self.block1 = nn.Sequential(
             nn.Conv2d(in_channels=in_channel, out_channels=64, kernel_size=7, stride=2, padding=3),
@@ -67,7 +72,7 @@ class DenseNet(nn.Module):
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
- 
+
         channels = 64
         block = []
         for i, layers in enumerate(block_layers):
@@ -81,22 +86,34 @@ class DenseNet(nn.Module):
         self.block2.add_module('relu', nn.ReLU(True))
         self.block2.add_module('avg_pool', nn.AvgPool2d(3))
         self.classifier = nn.Linear(channels, num_classes)
- 
+
     def forward(self, x):
         x = self.block1(x)
         x = self.block2(x)
         x = x.view(x.shape[0], -1)
         x = self.classifier(x)
         return x
- 
- 
+    
+
+def DenseNet1(in_channel=3, num_classes=2):
+    return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_1)
+
+def DenseNet2(in_channel=3, num_classes=2):
+    return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_2)
+
+def DenseNet3(in_channel=3, num_classes=2):
+    return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_3)
+
+def DenseNet4(in_channel=3, num_classes=2):
+    return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_4)
+
 def get_acc(output, label):
     total = output.shape[0]
     # output是概率，每行概率最高的就是预测值
     _, pred_label = output.max(1)
     num_correct = (pred_label == label).sum().item()
     return num_correct / total
- 
+
 if __name__ == '__main__':
     batch_size = 32
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
