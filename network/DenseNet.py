@@ -95,17 +95,29 @@ class DenseNet(nn.Module):
         return x
     
 
-def DenseNet1(in_channel=3, num_classes=2, pretrained=False):
-    return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_1)
+def DenseNet121(in_channel=3, num_classes=2, pretrained=False, include_top=True):
+    weights = torchvision.models.DenseNet121_Weights.DEFAULT if pretrained else None
+    model = torchvision.models.densenet121(weights=weights)
+    model.classifier = nn.Linear(model.classifier.in_features, num_classes)
+    return model
 
-def DenseNet2(in_channel=3, num_classes=2, pretrained=False):
-    return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_2)
+def DenseNet169(in_channel=3, num_classes=2, pretrained=False, include_top=True):
+    weights = torchvision.models.DenseNet169_Weights.DEFAULT if pretrained else None
+    model = torchvision.models.densenet169(weights=weights)
+    model.classifier = nn.Linear(model.classifier.in_features, num_classes)
+    return model
 
-def DenseNet3(in_channel=3, num_classes=2, pretrained=False):
-    return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_3)
+def DenseNet201(in_channel=3, num_classes=2, pretrained=False, include_top=True):
+    weights = torchvision.models.DenseNet201_Weights.DEFAULT if pretrained else None
+    model = torchvision.models.densenet201(weights=weights)
+    model.classifier = nn.Linear(model.classifier.in_features, num_classes)
+    return model
 
-def DenseNet4(in_channel=3, num_classes=2, pretrained=False):
-    return DenseNet(in_channel=in_channel, num_classes=num_classes, growth_rate=32, block_layers=BLOCK_LAYERS_4)
+def DenseNet161(in_channel=3, num_classes=2, pretrained=False, include_top=True):
+    weights = torchvision.models.DenseNet161_Weights.DEFAULT if pretrained else None
+    model = torchvision.models.densenet161(weights=weights)
+    model.classifier = nn.Linear(model.classifier.in_features, num_classes)
+    return model
 
 def get_acc(output, label):
     total = output.shape[0]
