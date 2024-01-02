@@ -6,6 +6,7 @@ python train.py \
 --device cuda \
 --data_dir dataset \
 \
+--k_fold 0 \
 --n_valid 64 \
 --transform_method_origin 1 \
 --transform_method_epoch 2 \

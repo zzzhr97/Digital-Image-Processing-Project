@@ -5,12 +5,14 @@
 
 > *务必在 `upload_dir` 中运行 `eval_model.py` ，得到合适的结果之后再提交！*
 - 由于`transform.py`可能不同，**将自己的`transform.py`替换掉`upload_dir/transform.py`文件**
-- 将模型权重文件复制到`upload_dir`下，并改名成`Net.pth`
-- 将网络定义文件复制到`upload_dir`下，并改名成`Net.py`
-- 打开`./upload_dir/model.py`文件，添加 **`from Net import xxx`** ，其中 **xxx** 是`Net.py`文件中的模型类名，并设置参数:
-  - `net`: **`Net.py`文件中的模型类名**
+- 将模型权重文件复制到`upload_dir`下，并改名成`Net.pth，Net1.pth，...`
+- 将网络定义文件复制到`upload_dir`下，并改名成`Net.py，Net1.py，...`
+- 打开`./upload_dir/model.py`文件，添加 **`from Net import xxx`** ，其中 **xxx** 是`Net.py`文件中的模型类名，`from Net1 import xxx`等也类似。并设置参数:
+  - `is_vote`: 是否使用voting
+  - `net / nets`: 对应文件中的模型类名
+  -  `ckpt_path / ckpt_paths`: 权重文件名
   - `num_classes`: 模型最后一层输出的形状，`1`或`2`
-  - `ckpt_path`: 权重文件名，默认为`Net.pth`
+  - `in_channel`: 输入深度
   - `transform_method_origin`: 读取数据时所用的预处理方法编号
   - `threshold`: `num_classes = 1`时，所使用的的`threshold`，范围在 $0\sim 1$ 之间
 - 打开`./upload_dir/eval_model.py`文件，根据任务修改`task`编号
@@ -114,6 +116,7 @@ bash visual.sh
   - `device`: 设备，`cuda`或`cpu`
   - `data_dir`: 数据集存放路径
 - *optimization parameters*:
+  - `k_fold`: 若为`0`或`1`，则不进行 k-fold cross validation，否则进行，并且数字为 fold 个数
   - `n_valid`: 验证集样本个数
   - `transform_method_origin`: 读取数据时所用的预处理方法编号
   - `transform_method_epoch`: 训练时对训练数据进行的随机性预处理方法编号
@@ -266,3 +269,9 @@ FusionPath负责综合上述两个模态
     - 添加`show_result.py`文件，对给定的`.csv`文件进行可视化
     - 修改`tensorboard`可视化相关代码，使之更加清晰，并且`step`从`1`开始索引，以保证`step = epoch`
     - 在`README.md`中添加可视化`.csv`文件的指引
+- *v0.8*
+  - *v0.8.0*
+    - 添加k-fold功能，主要改动为`data.py`，`main.py`以及调用`data.py`数据集的代码
+    - 添加voting功能，主要改动为`upload_dir/model.py`
+    - 添加新的命令行参数用于voting
+    - 修改了部分代码

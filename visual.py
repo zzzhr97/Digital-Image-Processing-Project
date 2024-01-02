@@ -1,6 +1,6 @@
 import argparse
 import os
-from PIL import Image, ImageDraw
+import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
@@ -84,7 +84,7 @@ def main(args):
 
             batch_data = total_data[start_idx:end_idx]
             save_path = os.path.join(args.save_dir, f'batch_{batch_idx:03d}.png')
-            save_batch_image(batch_data, save_path, args.is_show)
+            save_batch_image(batch_data, save_path, args.is_show, args.batch_height, args.batch_width)
 
             pbar.update(1)
             pbar.set_postfix_str(f"Generating {batch_idx:03d}-th figure")
@@ -93,20 +93,25 @@ def main(args):
         pbar.set_postfix_str()
 
 def transform(image):
-    image = cv2.resize(image, (96, 96)) # (800, 800, 3) -> (512, 512, 3)
+    image = cv2.resize(image, (512, 512)) # (800, 800, 3) -> (512, 512, 3)
     image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
 
     image = test_transform3(image)
 
     return image
 
-# 边缘检测
+# 无变换
+def test_transform0(image):
+    image = image.permute(1, 2, 0).numpy().astype(np.uint8)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    return image
+
+# 边缘检测canny
 def test_transform1(image):
     threshold1 = 20
     threshold2 = 100
     new_image = image.permute(1, 2, 0).numpy().astype(np.uint8)
     new_image = cv2.Canny(new_image, threshold1, threshold2)
-    print(new_image.shape)
     #new_image = torch.from_numpy(new_image).unsqueeze(0).float()
     return new_image
 
@@ -137,6 +142,14 @@ def test_transform4(image):
     blurred_image = cv2.GaussianBlur(gray, (5, 5), 0)
     return blurred_image
 
+# 翻转+90度旋转
+def test_transform5(image):
+    image = torch.flip(image, [1])
+    image = transforms.functional.rotate(image, 90)
+    image = image.permute(1, 2, 0).numpy().astype(np.uint8)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    return image
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Visualize the dataset.')
 
@@ -152,5 +165,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     setattr(args, 'is_shuffle', False)
     setattr(args, 'n_valid', 0)
+    setattr(args, 'k_fold', 0)
 
     main(args)

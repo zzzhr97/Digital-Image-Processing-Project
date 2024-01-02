@@ -32,13 +32,22 @@ def load_data(args, transform_method_origin, seed):
         n_valid=args.n_valid, 
         is_shuffle=args.is_shuffle, 
         seed=seed,
-        transform=transform
+        transform=transform,
+        k_fold=args.k_fold,
     )
-    train_data, valid_data = dataset.get_data()
+
+    # not use k-fold
+    if args.k_fold <= 1:
+        train_data, valid_data = dataset.get_data()
+
+    # use k-fold
+    else:
+        train_data, valid_data = None, None
+
     return dataset, train_data, valid_data
 
 class hyper_dataset(Dataset):
-    def __init__(self, data_dir, task=1, n_valid=64, is_shuffle=False, seed=123, transform=None):
+    def __init__(self, data_dir, task=1, n_valid=64, is_shuffle=False, seed=123, transform=None, k_fold=0):
         """
         Initializes the custom dataset.
 
@@ -46,10 +55,12 @@ class hyper_dataset(Dataset):
         - data_dir (str): Path to the directory containing the dataset.
         - task (int): Specifies the task associated with the dataset. 
             Should be either 1 or 2.
-        - n_valid (int): Number of validation images.
+        - n_valid (int): Number of validation images. It is not used if `k_fold > 1`.
         - is_shuffle (bool): Flag indicating whether to shuffle the dataset.
         - seed (int): Random seed.
         - transform (callable, optional): Optional transform to be applied on each image.
+        - k_fold (int): Number k of k-fold cross validation. 0 or 1 for not use k-fold.
+            It is not used if `n_valid == 0`.
 
         Attributes:
         - data_dir (str): Path to the dataset directory.
@@ -74,6 +85,7 @@ class hyper_dataset(Dataset):
         self.is_shuffle = is_shuffle
         self.seed = seed
         self.transform = transform 
+        self.k_fold = k_fold
         self.image_dir = os.path.join(data_dir, f'{task}-' + TASK_NAME[task], '1-Images', '1-Training Set') 
         self.label_dir = os.path.join(data_dir, f'{task}-' + TASK_NAME[task], '2-Groundtruths')
         self.label_file_name = 'HRDC ' +  TASK_NAME[task] + ' Training Labels.csv'
@@ -89,6 +101,24 @@ class hyper_dataset(Dataset):
 
         # load all the data to memory
         self.load_data_to_memory()
+
+        # get list data 
+        data = [self.__getitem__(idx) for idx in range(len(self.image_paths))]
+        if self.is_shuffle:
+            self.permutation = np.random.permutation(len(data))
+            data = [data[i] for i in self.permutation]
+        self.data = data
+
+        # get folded data
+        self.fold_data = []
+        if self.k_fold > 1:
+            self.fold_length = len(data) // self.k_fold
+            for i in range(self.k_fold):
+                if (i+1)*self.fold_length <= len(data):
+                    self.fold_data.append(data[i*self.fold_length:(i+1)*self.fold_length])
+        
+            print(f"Fold length: {self.fold_length}")
+            print(f"Number of folds: {len(self.fold_data)}")
 
     def set_seed(self):
         """Set random seed."""
@@ -117,17 +147,32 @@ class hyper_dataset(Dataset):
         - train_data (list): List of training data dictionaries.
         - valid_data (list): List of validation data dictionaries.
         """
-        data = [self.__getitem__(idx) for idx in range(len(self.image_paths))]
-        if self.is_shuffle:
-            self.permutation = np.random.permutation(len(data))
-            data = [data[i] for i in self.permutation]
-
         # return all data for the first if n_valid is 0
         if self.n_valid == 0:
-            return data, None
+            return self.data, None
         
-        train_data = data[:-self.n_valid]
-        valid_data = data[-self.n_valid:]
+        train_data = self.data[:-self.n_valid]
+        valid_data = self.data[-self.n_valid:]
+        return train_data, valid_data
+    
+    def get_fold_data(self, fold_i):
+        """
+        Returns i-th fold training and validation data.
+
+        Format: [idx: {'image': image, 'label': label, 'name': name}]
+
+        Returns:
+        - train_data (list): List of training data dictionaries.
+        - valid_data (list): List of validation data dictionaries.
+        """
+        train_data = []
+        for fold_idx, fold_data in enumerate(self.fold_data):
+            if fold_idx == fold_i:
+                valid_data = fold_data
+                print(f" Valid data: [{fold_i * self.fold_length} : {(fold_i+1) * self.fold_length}] ", end='')
+            else:
+                train_data += fold_data
+
         return train_data, valid_data
     
     def load_data_to_memory(self):

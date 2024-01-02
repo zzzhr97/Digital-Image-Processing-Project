@@ -5,12 +5,12 @@ checkpoints/
 sample code/
 results/
 results.png
-Net.pth
+Net*.pth
 visual/
 visual.zip
 final*
-upload_dir/Net.py
-upload_dir/Net.pth
+upload_dir/Net*.py
+upload_dir/Net*.pth
 log/
 my/
 checkpoints_load/

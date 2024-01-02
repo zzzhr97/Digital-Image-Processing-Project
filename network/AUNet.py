@@ -117,19 +117,18 @@ def get_AUNet(in_dim, out_dim, first_dim, depth):
     config = [first_dim * 2**i for i in range(depth)]
     return AUNet(in_dim, out_dim, config)
 
-def AUNet3(num_classes=2):
+def AUNet3(num_classes=2, in_channel=3, pretrained=False):
     # 512 -> 256 -> 128 -> 256 -> 512
-    return get_AUNet(3, num_classes, 16, 3)
+    return get_AUNet(in_channel, num_classes, 16, 3)
 
-def AUNet4(num_classes=2):
+def AUNet4(num_classes=2, in_channel=3, pretrained=False):
     # 512 -> 256 -> 128 -> 64 -> 128 -> 256 -> 512
-    return get_AUNet(3, num_classes, 32, 4)
+    return get_AUNet(in_channel, num_classes, 32, 4)
 
-def AUNet5(num_classes=2):
+def AUNet5(num_classes=2, in_channel=3, pretrained=False):
     # 512 -> 256 -> 128 -> 64 -> 32 -> 64 -> 128 -> 256 -> 512
-    return get_AUNet(3, num_classes, 32, 5)
+    return get_AUNet(in_channel, num_classes, 32, 5)
 
-def AUNet6(num_classes=2):
+def AUNet6(num_classes=2, in_channel=3, pretrained=False):
     # 512 -> 256 -> 128 -> 64 -> 32 -> 16 -> 32 -> 64 -> 128 -> 256 -> 512
-    return get_AUNet(3, num_classes, 32, 6)
-
+    return get_AUNet(in_channel, num_classes, 32, 6)

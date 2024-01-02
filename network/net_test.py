@@ -3,10 +3,10 @@ from torch import nn
 import torchvision.models as models
 
 class TestNet(nn.Module):
-    def __init__(self, num_classes, weights=None):
+    def __init__(self, num_classes, in_channel=3, pretrained=None):
         super(TestNet, self).__init__()
         self.conv_layer = nn.Sequential(
-            nn.Conv2d(3, 4, kernel_size=3, stride=1, padding=1),    # (3, 512, 512) -> (4, 512, 512)
+            nn.Conv2d(in_channel, 4, kernel_size=3, stride=1, padding=1),    # (3, 512, 512) -> (4, 512, 512)
             nn.ReLU(),  
             nn.MaxPool2d(kernel_size=2),                            # (4, 512, 512) -> (4, 256, 256)      
             nn.Conv2d(4, 8, kernel_size=3, stride=1, padding=1),    # (4, 256, 256) -> (8, 256, 256)

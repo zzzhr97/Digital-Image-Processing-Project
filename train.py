@@ -6,7 +6,7 @@ import argparse
 import numpy as np
 import time
 
-from data import load_data
+from data import load_data, hyper_dataset
 import transform
 import network
 import utils
@@ -39,17 +39,14 @@ def search_threshold(args, seed, loss_fn, load_path, data, device):
     assert type(best_threshold) == float, f'type of best threshold is {type(best_threshold)}, but should be float'
     return best_threshold
 
-def train(args, seed=123):
-    # set seed
-    utils.set_seed(seed)
+def train_once(args, dataset, train_data, valid_data, fold_i, seed):
+    """Train once (for k-fold cross validation)"""
 
-    # load data
-    print("Loading data...", end=' ')
-    dataset, train_data, valid_data = load_data(args, 
-        transform_method_origin=args.transform_method_origin, 
-        seed=seed)
-    print("Done.")
-    print(f'number of training data: {len(train_data)} \tnumber of validation data: {len(valid_data)}')
+    if args.k_fold > 1:
+        print(f"\nLoading data [fold-{fold_i+1:02d}]...", end='')
+        train_data, valid_data = dataset.get_fold_data(fold_i)
+        print("Done.")
+        print(f'number of training data: {len(train_data)} \tnumber of validation data: {len(valid_data)}')
 
     # path to save checkpoints
     ckpt_save_path = os.path.join(args.ckpt_dir, f'task-{args.task}', f'{args.model}')
@@ -93,11 +90,6 @@ def train(args, seed=123):
         print(f'\tOutput dimension: {args.out_dim} and will use CrossEntropyLoss.')
         loss_fn = utils.cross_entropy_loss
 
-    # tensorboard visualization
-    log_dir = os.path.join('log', f'task-{args.task}', f'{args.model}')
-    os.makedirs(log_dir, exist_ok=True)
-    writer = SummaryWriter(log_dir=log_dir)
-
     # optimizer
     params = net.parameters()
     if args.optimizer == "adam":
@@ -126,124 +118,138 @@ def train(args, seed=123):
     # training for each epoch
     print("Begin training.")
     net.train()
-    for epoch in range(args.n_epochs):
-        
-        # learning rate decay
-        if epoch in lr_decay.keys():
-            for param_group in optimizer.param_groups:
-                param_group['lr'] = lr_decay[epoch]
-            print(f"At the {epoch}-th epoch, decay lr to {lr_decay[epoch]}.")
-
-        # shuffle the training data for each epoch
-        permutation = np.random.permutation(len(train_data))
-        train_data_shuffled = [train_data[i] for i in permutation]
-
-        # training for each batch
-        for batch_idx in range(n_batches):
-
-            # calculate training data index in this batch
-            start_idx = batch_idx * args.batch_size
-            end_idx = start_idx + args.batch_size
-            if end_idx > len(train_data):
-                end_idx = len(train_data)
-
-            # get the training data for this batch
-            batch_data = train_data_shuffled[start_idx:end_idx]
-            images = torch.stack([x['image'] for x in batch_data])
-            labels = torch.tensor([x['label'] for x in batch_data])
-
-            # writer: show images
-            if epoch == 0:
-                current_step = batch_idx
-                writer.add_images(f"Image", images, global_step=current_step, walltime=None, dataformats='NCHW')
-
-            # print the input shape of the first batch in the first epoch
-            if epoch == 0 and batch_idx == 0:   
-                print(f'\tBatch images shape: {images.shape}')
-                print(f'\tBatch labels shape: {labels.shape}')
-
-            # move data to device
-            images = images.to(device, torch.float)
-            labels = labels.to(device, torch.float)
-
-            #if batch_idx == 0: 
-                #utils.show_image(images[0].detach().cpu(), labels[0].detach().cpu(), batch_data[0]['name'])   
-
-            # implement transform_method_epoch
-            images = utils.transform_data(images, args.transform_method_epoch)
-
-            #if batch_idx == 0: 
-                #utils.show_image(images[0].detach().cpu(), labels[0].detach().cpu(), batch_data[0]['name'])   
-
-            # forward pass
-            output = net(images)
-
-            # print the output shape of the first batch in the first epoch
-            if epoch == 0 and batch_idx == 0:
-                print(f'\tBatch output shape: {output.shape}')
-
-            # calculate loss
-            loss = loss_fn(output, labels.view(-1, 1).float())
-
-            # backward pass
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            # print the loss
-            if (batch_idx + 1) % args.print_every == 0:
-                print(f'\tEpoch {epoch + 1} || Batch {batch_idx + 1:3} || Loss: {loss.item():.4f}')
-
-        # evaluate the model on the validation set
-        if (epoch + 1) % args.eval_every == 0:
-            eval_start_time = time.time()
-            train_scores, train_TFPN, valid_scores, valid_TFPN = utils.eval(
-                net, train_data, valid_data, args.threshold, loss_fn, args.out_dim, device)
-            print(f'[ Epoch {epoch + 1:3} ]',
-                f'train score: {train_scores["Average"]:.4f}',
-                f'|| valid score: {valid_scores["Average"]:.4f}',
-                f'|| train loss: {train_scores["Loss"]:.4f}',
-                f'|| valid loss: {valid_scores["Loss"]:.4f}',
-                f'|| time: {time.time() - start_time:8.2f}s',
-                f'|| eval time: {time.time() - eval_start_time:4.2f}s\n',
-                f'             train TP/TN/FP/FN: {train_TFPN["TP"]:3}/{train_TFPN["TN"]:3}/{train_TFPN["FP"]:3}/{train_TFPN["FN"]:3}',
-                f'|| valid TP/TN/FP/FN: {valid_TFPN["TP"]:2}/{valid_TFPN["TN"]:2}/{valid_TFPN["FP"]:2}/{valid_TFPN["FN"]:2}',
-            )
+    try:
+        for epoch in range(args.n_epochs):
             
-            # save the best network weights (best loss)
-            if valid_scores["Loss"] < best_valid_result_loss["Loss"]:
-                best_valid_result_loss = valid_scores
-                utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best_loss.pth', ckpt_save_path, device)
+            # learning rate decay
+            if epoch in lr_decay.keys():
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = lr_decay[epoch]
+                print(f"At the {epoch}-th epoch, decay lr to {lr_decay[epoch]}.")
 
-            # save the best network weights (best score)
-            if valid_scores["Average"] > best_valid_result_score["Average"]:
-                best_valid_result_score = valid_scores
-                utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best_score.pth', ckpt_save_path, device)
+            # shuffle the training data for each epoch
+            permutation = np.random.permutation(len(train_data))
+            train_data_shuffled = [train_data[i] for i in permutation]
 
-            # save the results
-            results.append({
-                'epoch': epoch + 1,
-                'train_score': train_scores,
-                'valid_score': valid_scores,
-            })
+            # training for each batch
+            for batch_idx in range(n_batches):
 
-            # visualize
-            current_step = epoch + 1
-            writer.add_scalar("1.Average/Valid", valid_scores["Average"], current_step)
-            writer.add_scalar("1.Average/Train", train_scores["Average"], current_step)
-            writer.add_scalar("2.Loss/Train", train_scores["Loss"], current_step)
-            writer.add_scalar("2.Loss/Valid", valid_scores["Loss"], current_step)
-            writer.add_scalar("3.Kappa/Train", train_scores["Kappa"], current_step)
-            writer.add_scalar("3.Kappa/Valid", valid_scores["Kappa"], current_step)
-            writer.add_scalar("4.F1/Train", train_scores["F1"], current_step)
-            writer.add_scalar("4.F1/Valid", valid_scores["F1"], current_step)
-            writer.add_scalar("5.Specificity/Train", train_scores["Specificity"], current_step)
-            writer.add_scalar("5.Specificity/Valid", valid_scores["Specificity"], current_step)
+                # calculate training data index in this batch
+                start_idx = batch_idx * args.batch_size
+                end_idx = start_idx + args.batch_size
+                if end_idx > len(train_data):
+                    end_idx = len(train_data)
+
+                # get the training data for this batch
+                batch_data = train_data_shuffled[start_idx:end_idx]
+                images = torch.stack([x['image'] for x in batch_data])
+                labels = torch.tensor([x['label'] for x in batch_data])
+
+                # writer: show images
+                if epoch == 0:
+                    current_step = batch_idx
+                    writer.add_images(f"Image.{fold_i}", images, global_step=current_step, walltime=None, dataformats='NCHW')
+
+                # print the input shape of the first batch in the first epoch
+                if epoch == 0 and batch_idx == 0:   
+                    print(f'\tBatch images shape: {images.shape}')
+                    print(f'\tBatch labels shape: {labels.shape}')
+
+                # move data to device
+                images = images.to(device, torch.float)
+                labels = labels.to(device, torch.float)
+
+                #if batch_idx == 0: 
+                    #utils.show_image(images[0].detach().cpu(), labels[0].detach().cpu(), batch_data[0]['name'])   
+
+                # implement transform_method_epoch
+                images = utils.transform_data(images, args.transform_method_epoch)
+
+                #if batch_idx == 0: 
+                    #utils.show_image(images[0].detach().cpu(), labels[0].detach().cpu(), batch_data[0]['name'])   
+
+                # forward pass
+                output = net(images)
+
+                # print the output shape of the first batch in the first epoch
+                if epoch == 0 and batch_idx == 0:
+                    print(f'\tBatch output shape: {output.shape}')
+
+                # calculate loss
+                loss = loss_fn(output, labels.view(-1, 1).float())
+
+                # backward pass
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                # print the loss
+                if (batch_idx + 1) % args.print_every == 0:
+                    print(f'\tEpoch {epoch + 1} || Batch {batch_idx + 1:3} || Loss: {loss.item():.4f}')
+
+            # evaluate the model on the validation set
+            if (epoch + 1) % args.eval_every == 0:
+                eval_start_time = time.time()
+                train_scores, train_TFPN, valid_scores, valid_TFPN = utils.eval(
+                    net, train_data, valid_data, args.threshold, loss_fn, args.out_dim, device)
+                print(f'[ Epoch {epoch + 1:3} ]',
+                    f'train score: {train_scores["Average"]:.4f}',
+                    f'|| valid score: {valid_scores["Average"]:.4f}',
+                    f'|| train loss: {train_scores["Loss"]:.4f}',
+                    f'|| valid loss: {valid_scores["Loss"]:.4f}',
+                    f'|| time: {time.time() - start_time:8.2f}s',
+                    f'|| eval time: {time.time() - eval_start_time:4.2f}s\n',
+                    f'             train TP/TN/FP/FN: {train_TFPN["TP"]:3}/{train_TFPN["TN"]:3}/{train_TFPN["FP"]:3}/{train_TFPN["FN"]:3}',
+                    f'|| valid TP/TN/FP/FN: {valid_TFPN["TP"]:2}/{valid_TFPN["TN"]:2}/{valid_TFPN["FP"]:2}/{valid_TFPN["FN"]:2}',
+                )
+                
+                # save the best network weights (best loss)
+                if valid_scores["Loss"] < best_valid_result_loss["Loss"]:
+                    best_valid_result_loss = valid_scores
+                    f_name = f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best_loss.pth'
+                    if args.k_fold > 1:
+                        f_name = f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_fold{fold_i}_best_loss.pth'
+                    utils.checkpoint(net, f_name, ckpt_save_path, device)
+
+                # save the best network weights (best score)
+                if valid_scores["Average"] > best_valid_result_score["Average"]:
+                    best_valid_result_score = valid_scores
+                    f_name = f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_best_score.pth'
+                    if args.k_fold > 1:
+                        f_name = f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_fold{fold_i}_best_score.pth'
+                    utils.checkpoint(net, f_name, ckpt_save_path, device)
+
+                # save the results
+                results.append({
+                    'epoch': epoch + 1,
+                    'train_score': train_scores,
+                    'valid_score': valid_scores,
+                })
+
+                # visualize
+                current_step = epoch + 1
+                writer.add_scalar(f"1.{fold_i}.Average/Valid", valid_scores["Average"], current_step)
+                writer.add_scalar(f"1.{fold_i}.Average/Train", train_scores["Average"], current_step)
+                writer.add_scalar(f"2.{fold_i}.Loss/Train", train_scores["Loss"], current_step)
+                writer.add_scalar(f"2.{fold_i}.Loss/Valid", valid_scores["Loss"], current_step)
+                writer.add_scalar(f"3.{fold_i}.Kappa/Train", train_scores["Kappa"], current_step)
+                writer.add_scalar(f"3.{fold_i}.Kappa/Valid", valid_scores["Kappa"], current_step)
+                writer.add_scalar(f"4.{fold_i}.F1/Train", train_scores["F1"], current_step)
+                writer.add_scalar(f"4.{fold_i}.F1/Valid", valid_scores["F1"], current_step)
+                writer.add_scalar(f"5.{fold_i}.Specificity/Train", train_scores["Specificity"], current_step)
+                writer.add_scalar(f"5.{fold_i}.Specificity/Valid", valid_scores["Specificity"], current_step)
 
 
-        # save the network weights
-        if (epoch + 1) % args.ckpt_every == 0:
-            utils.checkpoint(net, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_epoch{epoch + 1}.pth', ckpt_save_path, device)
+            # save the network weights
+            if (epoch + 1) % args.ckpt_every == 0:
+                f_name = f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_epoch{epoch + 1}.pth'
+                if args.k_fold > 1:
+                    f_name = f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_fold{fold_i}_epoch{epoch + 1}.pth'
+                utils.checkpoint(net, f_name, ckpt_save_path, device)
+
+    except KeyboardInterrupt:
+        print(f'Keyboard Interrupted.')
+        is_exit = 1
 
     # close writer of tensorboard
     writer.close()
@@ -264,10 +270,47 @@ def train(args, seed=123):
     # format: 
     #   the last element is {'best_threshold': best threshold in validation set}
     #   the other elements are {'epoch': epoch, 'train_score': train scores list, 'valid_score': valid scores list}
-    utils.save_results(args, results, f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}.csv', result_save_path)
+    f_name = f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}.csv'
+    if args.k_fold > 1:
+        f_name = f'lr{args.lr}_bs{args.batch_size}_epochs{args.n_epochs}_seed{seed}_fold{fold_i}.csv'
+    utils.save_results(args, results, f_name, result_save_path)
 
-    # visualize the results
-    utils.visualize_results(results, best_valid_result)
+    try:
+        # visualize the results
+        utils.visualize_results(results, best_valid_result)
+    except:
+        print('Cannot visualize the results.')
+
+    if is_exit:
+        exit()
+
+def train(args, seed=123):
+    # set seed
+    utils.set_seed(seed)
+
+    # load data
+    print("Loading data...", end=' ')
+    dataset, train_data, valid_data = load_data(
+        args, 
+        transform_method_origin=args.transform_method_origin, 
+        seed=seed)
+    print("Done.")
+
+    # tensorboard visualization
+    log_dir = os.path.join('log', f'task-{args.task}', f'{args.model}')
+    os.makedirs(log_dir, exist_ok=True)
+    global writer
+    writer = SummaryWriter(log_dir=log_dir)
+    
+    assert (train_data == None and args.k_fold > 1) \
+        or (train_data is not None and args.k_fold <= 1), \
+        print("Error: Loading data.")
+
+    if args.k_fold <= 1:
+        print(f'number of training data: {len(train_data)} \tnumber of validation data: {len(valid_data)}')
+
+    for fold_i in range(max(args.k_fold, 1)):
+        train_once(args, dataset, train_data, valid_data, fold_i, seed)
 
 def main(args):
     for seed in args.seed:
@@ -283,6 +326,7 @@ if __name__ == '__main__':
     parser.add_argument('--device', choices=['cuda', 'cpu'], default='cuda', help='device used')
 
     # optimization parameters
+    parser.add_argument('--k_fold', type=int, default=0, help="the number k of k-fold cross validation (0 or 1 for not use k-fold)")
     parser.add_argument('--n_valid', type=int, default=64, help='number of validation images')
     parser.add_argument('--transform_method_origin', type=int, default=1, 
                         help='transform method number for each image while loading data')

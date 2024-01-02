@@ -196,6 +196,19 @@ class ResNet(nn.Module):
 
 # ResNet()中block参数对应的位置是BasicBlock或Bottleneck
 # ResNet()中blocks_num[0-3]对应[3, 4, 6, 3]，表示残差模块中的残差数
+    
+
+def freeze(model, freeze_conv=True, freeze_bn=True, freeze_layers = [1]):
+    """Freeze the given layers"""
+    if freeze_conv:
+        for param in model.conv1.parameters():
+            param.requires_grad = False
+    if freeze_bn:
+        for param in model.bn1.parameters():
+            param.requires_grad = False
+    for i in freeze_layers:
+        for param in getattr(model, f'layer{i}').parameters():
+            param.requires_grad = False
 
 # 18层的resnet
 def ResNet18(num_classes=1, in_channel=3, pretrained=False, include_top=True):
@@ -203,6 +216,11 @@ def ResNet18(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     weights = models.ResNet18_Weights.DEFAULT if pretrained else None
     model = models.resnet18(weights=weights)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
+    freeze(model,
+        freeze_conv=True,
+        freeze_bn=True,
+        freeze_layers = [1]
+    )
     return model
 
 def resnet18(num_classes=1, in_channel=3, pretrained=False, include_top=True):
@@ -214,6 +232,11 @@ def ResNet34(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     weights = models.ResNet34_Weights.IMAGENET1K_V1 if pretrained else None
     model = models.resnet34(weights=weights)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
+    freeze(model,
+        freeze_conv=True,
+        freeze_bn=True,
+        freeze_layers = [1]
+    )
     return model
     
 def resnet34(num_classes=1, in_channel=3, pretrained=False, include_top=True):
@@ -226,6 +249,11 @@ def ResNet50(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     weights = models.ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
     model = models.resnet50(weights=weights)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
+    freeze(model,
+        freeze_conv=True,
+        freeze_bn=True,
+        freeze_layers = [1]
+    )
     return model
     
 def resnet50(num_classes=1, in_channel=3, pretrained=False, include_top=True):
@@ -238,6 +266,11 @@ def ResNet101(num_classes=1, in_channel=3, pretrained=False, include_top=True):
     weights = models.ResNet101_Weights.DEFAULT if pretrained else None
     model = models.resnet101(weights=weights)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
+    freeze(model,
+        freeze_conv=True,
+        freeze_bn=True,
+        freeze_layers = [1]
+    )
     return model
     
 def resnet101(num_classes=1, in_channel=3, pretrained=False, include_top=True):

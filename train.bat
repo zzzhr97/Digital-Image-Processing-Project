@@ -4,11 +4,12 @@ python train.py ^
 --device cuda ^
 --data_dir dataset ^
     ^
+--k_fold 5 ^
 --n_valid 128 ^
 --transform_method_origin 1 ^
 --transform_method_epoch 2 ^
 --batch_size 4 ^
---n_epochs 150 ^
+--n_epochs 2 ^
 --is_shuffle 1 ^
     ^
 --optimizer adam ^
@@ -21,7 +22,7 @@ python train.py ^
     ^
 --out_dim 2 ^
 --threshold 0.5 ^
---model resnet50 ^
+--model TestNet ^
 --is_search 0 ^
     ^
 --ckpt_dir checkpoints ^

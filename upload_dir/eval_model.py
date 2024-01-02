@@ -13,6 +13,7 @@ class ARGS():
         self.task = task
         self.n_valid = 0
         self.is_shuffle = False
+        self.k_fold = 0
 
 def main(args):
     # print parameters

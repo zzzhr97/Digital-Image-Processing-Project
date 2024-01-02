@@ -6,6 +6,6 @@ python visual.py \
 --data_dir dataset \
 --save_dir visual \
 --begin_idx 0 \
---batch_height 2 \
---batch_width 5 \
+--batch_height 1 \
+--batch_width 2 \
 --batch_num 1
