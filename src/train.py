@@ -5,11 +5,13 @@ from torch.utils.tensorboard import SummaryWriter
 import argparse
 import numpy as np
 import time
+import sys
+sys.path.append('./')
 
 from data import load_data, hyper_dataset
-import transform
+import transform as transform
 import network
-import utils
+import utils as utils
 
 def search_threshold(args, seed, loss_fn, load_path, data, device):
     """search the best threshold in validation set for classification."""

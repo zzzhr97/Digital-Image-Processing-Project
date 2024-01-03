@@ -1,4 +1,4 @@
-python train.py ^
+python src/train.py ^
 --task 1 ^
 --seed 1 ^
 --device cuda ^

@@ -8,8 +8,9 @@ import cv2
 import torch
 import sys
 sys.path.append('./')
+sys.path.append('./src/')
 
-from data import load_data
+from src.data import load_data
 
 def save_batch_image(batch_data, save_path, is_show, batch_height=2, batch_width=5):
     """Save a batch of images and labels to a figure."""
@@ -100,7 +101,7 @@ def transform(image):
     image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
     # ============================================
 
-    image = test_transform3(image)
+    image = test_transform4(image)
     
     # ============================================
     return image

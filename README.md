@@ -44,7 +44,7 @@ python eval_model.py
 ## 注意事项
 
 1. 运行前，先将数据集放在`./dataset`文件夹下，如`./dataset/1-Hypertensive Classification`，以及`./dataset/2-Hypertensive Retinopathy Classification`。
-2. 运行时，可以输入命令
+2. 输入命令进行训练
 ``` shell
 # Windows
 scripts/train.bat
@@ -97,18 +97,28 @@ bash scripts/train.sh
     - 仅**选择1**需要的任务数
   - `result_net`
     - 仅**选择1**需要的网络模型名
+- 运行命令
+```shell
+# Windows
+scripts/show_result.bat
+
+# Linux
+bash scripts/show_result.py
+```
 - 最终会在主文件夹下生成`results.png`，并在`save_path`下生成tensorboard文件
 
 ## 可视化数据集
 使用下列命令来查看命令行参数信息。
 ```bash
-python visual.py -h
+python visual/visual.py -h
 ```
 运行脚本，生成图片。
-```bash
-visual.bat
-# or
-bash visual.sh
+```shell
+# Windows
+scripts/visual.bat
+
+# Linux
+bash scripts/visual.sh
 ```
 
 ## 命令行参数
@@ -277,3 +287,5 @@ FusionPath负责综合上述两个模态
     - 添加voting功能，主要改动为`upload_dir/model.py`
     - 添加新的命令行参数用于voting
     - 修改了部分代码
+  - *v0.8.1*
+    - 修改文件、文件夹的布局

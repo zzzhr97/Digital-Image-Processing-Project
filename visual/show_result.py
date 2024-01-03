@@ -1,6 +1,7 @@
 import sys
 sys.path.append('./')
-from utils import restore_results, visualize_results, save_results_with_writer
+sys.path.append('./src/')
+from src.utils import restore_results, visualize_results, save_results_with_writer
 
 # if True, load from ./results/result_task/result_net/result_name
 # otherwise, load from ./

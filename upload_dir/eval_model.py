@@ -1,8 +1,8 @@
 import torch
 from tqdm import tqdm
 
-import data
-import utils
+import data as data
+import utils as utils
 import model
 
 task = 1

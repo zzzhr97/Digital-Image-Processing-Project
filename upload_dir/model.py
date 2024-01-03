@@ -2,7 +2,7 @@ import os
 import torch
 from torch import nn
 
-import transform
+import transform as transform
 from Net import ResNet101
 # from Net1 import *
 # from Net2 import *
