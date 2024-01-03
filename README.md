@@ -33,13 +33,14 @@ python eval_model.py
 4. `./checkpoints_load/` 训练一次后生成，用于放入训练前加载的模型参数文件，(不会上传至github)
 5. `./dataset/` 数据集，(不会上传至github，需要在本地放置数据集)
 6. `./upload_dir/` 用于测试和提交模型的文件夹
-7. `data.py` 数据读取和处理
-8. `transform.py` 数据预处理
-9. `utils.py` 包含了一些功能型函数
-10. `train.py` 训练模型
-11. `./scripts/` `train.py`运行脚本
-12. `./visual_images/` 用于存放数据集可视化之后的图片，(不会上传至github，需要另外保存)
-13. `./visual/` `visual.py`用于批量可视化数据集，`show_result.py`根据`.csv`文件还原可视化数据
+7. `./src/` 用于训练的代码文件
+8. `./src/data.py` 数据读取和处理
+9. `./src/transform.py` 数据预处理
+10. `./src/utils.py` 包含了一些功能型函数
+11. `./src/train.py` 训练模型
+12. `./scripts/` `train.py`运行脚本
+13. `./visual_images/` 用于存放数据集可视化之后的图片，(不会上传至github，需要另外保存)
+14. `./visual/` `visual.py`用于批量可视化数据集，`show_result.py`根据`.csv`文件还原可视化数据
 
 ## 注意事项
 
@@ -289,3 +290,4 @@ FusionPath负责综合上述两个模态
     - 修改了部分代码
   - *v0.8.1*
     - 修改文件、文件夹的布局
+    - 修改READMD.md
