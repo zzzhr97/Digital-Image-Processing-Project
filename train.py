@@ -118,6 +118,7 @@ def train_once(args, dataset, train_data, valid_data, fold_i, seed):
     # training for each epoch
     print("Begin training.")
     net.train()
+    is_exit = 0
     try:
         for epoch in range(args.n_epochs):
             

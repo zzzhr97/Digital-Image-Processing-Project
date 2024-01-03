@@ -130,6 +130,7 @@ def restore_results(result_path):
 
 def save_results_with_writer(result, save_path):
     """Save the results to a tensorboard file."""
+    os.makedirs(save_path, exist_ok=True)
     writer = SummaryWriter(save_path)
     for i, epoch_result in enumerate(result):
         writer.add_scalar('1.Average/train', epoch_result['train_score']['Average'], i+1)
@@ -144,6 +145,7 @@ def save_results_with_writer(result, save_path):
         writer.add_scalar('5.Specificity/valid', epoch_result['valid_score']['Specificity'], i+1)
 
     writer.close()
+    print(f'\tImages visualization saved to {save_path}')
 
 def eval(net, train_data, valid_data, threshold, loss_fn, out_dim, device):
     """

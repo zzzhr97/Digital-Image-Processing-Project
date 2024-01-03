@@ -1,8 +1,8 @@
-python visual.py ^
+python visual/visual.py ^
 --task 1 ^
 --is_show 0 ^
 --data_dir dataset ^
---save_dir visual ^
+--save_dir visual_images ^
 --begin_idx 0 ^
 --batch_height 2 ^
 --batch_width 2 ^

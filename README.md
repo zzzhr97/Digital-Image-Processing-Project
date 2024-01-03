@@ -27,34 +27,36 @@ python eval_model.py
 
 ## 文件结构
 
-1. `./dataset/` 数据集，**需要在本地放置数据集**
-2. `./network/` 网络模型
-3. `./results/` 训练后生成，保存训练结果的`.csv`文件，**不会上传至github，需要另外保存**
-4. `./checkpoints/` 训练后生成，保存训练时的模型参数，为`.pth`文件，**不会上传至github，需要另外保存**
-5. `./checkpoints_load/` 训练一次后生成，用于放入训练前加载的模型参数文件，**不会上传至github**
+1. `./network/` 网络模型
+2. `./results/` 训练后生成，保存训练结果的`.csv`文件，(不会上传至github，需要另外保存)
+3. `./checkpoints/` 训练后生成，保存训练时的模型参数，为`.pth`文件，(不会上传至github，需要另外保存)
+4. `./checkpoints_load/` 训练一次后生成，用于放入训练前加载的模型参数文件，(不会上传至github)
+5. `./dataset/` 数据集，(不会上传至github，需要在本地放置数据集)
 6. `./upload_dir/` 用于测试和提交模型的文件夹
 7. `data.py` 数据读取和处理
 8. `transform.py` 数据预处理
 9. `utils.py` 包含了一些功能型函数
 10. `train.py` 训练模型
-11. `train.bat` *windows* 运行脚本
-12. `train.sh` *linux* 运行脚本
-13. `model.py` 用于在测试集上评估模型的模型文件
-14. `eval_model.py` 模拟在测试集上对模型进行评估（实际使用了训练集）
-15. `./visual/` 用于存放数据集可视化之后的图片，**不会上传至github，需要另外保存**
-16. `visual.py` 用于批量可视化数据集
-17. `visual.bat` 运行`visual.py`的*windows*脚本
-18. `visual.sh` 运行`visual.py`的*linux*脚本
-19. `show_result.py` 用于可视化给定`.csv`文件的脚本
+11. `./scripts/` `train.py`运行脚本
+12. `./visual_images/` 用于存放数据集可视化之后的图片，(不会上传至github，需要另外保存)
+13. `./visual/` `visual.py`用于批量可视化数据集，`show_result.py`根据`.csv`文件还原可视化数据
 
 ## 注意事项
 
 1. 运行前，先将数据集放在`./dataset`文件夹下，如`./dataset/1-Hypertensive Classification`，以及`./dataset/2-Hypertensive Retinopathy Classification`。
-2. 运行一次后，才会生成`checkpoint_load`文件夹，也可以自行创建该文件夹。
-3. 最终保存下来的`.pth`模型权重文件位于`./checkpoints`文件夹中。`./checkpoints`文件夹不会被上传至github，需要另外保存。
-4. 结果数据保存在`./results/`中，该文件夹不会被上传至github，需要另外保存。
-5. 每次训练完毕，都会在主文件夹中生成`results.png`用于可视化训练过程。
-6. 神经网络调用时，要求接收三个参数:
+2. 运行时，可以输入命令
+``` shell
+# Windows
+scripts/train.bat
+
+# Linux
+bash scripts/train.sh
+```
+3. 运行一次后，才会生成`checkpoint_load`文件夹，也可以自行创建该文件夹。
+4. 最终保存下来的`.pth`模型权重文件位于`./checkpoints`文件夹中。`./checkpoints`文件夹不会被上传至github，需要另外保存。
+5. 结果数据保存在`./results/`中，该文件夹不会被上传至github，需要另外保存。
+6. 每次训练完毕，都会在主文件夹中生成`results.png`用于可视化训练过程。
+7. 神经网络调用时，要求接收三个参数:
    - `num_classes`，最后输出的大小
    - `in_channel`，输入数据的深度
    - `pretrained`，是否预训练

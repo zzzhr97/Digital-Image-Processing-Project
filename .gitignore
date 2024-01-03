@@ -6,7 +6,7 @@ sample code/
 results/
 results.png
 Net*.pth
-visual/
+visual_images/
 visual.zip
 final*
 upload_dir/Net*.py

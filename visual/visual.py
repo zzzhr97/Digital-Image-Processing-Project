@@ -6,6 +6,8 @@ import numpy as np
 from tqdm import tqdm
 import cv2
 import torch
+import sys
+sys.path.append('./')
 
 from data import load_data
 
@@ -92,12 +94,15 @@ def main(args):
         pbar.set_description("Generating done")
         pbar.set_postfix_str()
 
+# transform the image
 def transform(image):
     image = cv2.resize(image, (512, 512)) # (800, 800, 3) -> (512, 512, 3)
     image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
+    # ============================================
 
     image = test_transform3(image)
-
+    
+    # ============================================
     return image
 
 # 无变换
