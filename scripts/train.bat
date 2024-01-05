@@ -1,6 +1,6 @@
 python src/train.py ^
 --task 1 ^
---seed 1 ^
+--seed 135 ^
 --device cuda ^
 --data_dir dataset ^
     ^
@@ -9,7 +9,7 @@ python src/train.py ^
 --transform_method_origin 1 ^
 --transform_method_epoch 2 ^
 --batch_size 4 ^
---n_epochs 2 ^
+--n_epochs 200 ^
 --is_shuffle 1 ^
     ^
 --optimizer adam ^
@@ -22,7 +22,7 @@ python src/train.py ^
     ^
 --out_dim 2 ^
 --threshold 0.5 ^
---model TestNet ^
+--model DenseNet121 ^
 --is_search 0 ^
     ^
 --ckpt_dir checkpoints ^

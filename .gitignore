@@ -11,7 +11,9 @@ visual.zip
 final*
 upload_dir/Net*.py
 upload_dir/Net*.pth
+upload_dir/transform*.py
 log/
 my/
 checkpoints_load/
 *.csv
+Slide.pdf

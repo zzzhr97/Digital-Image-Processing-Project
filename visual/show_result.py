@@ -10,7 +10,7 @@ is_from_dir = False
 # the save path of tensorboard file 
 save_path = './log/tmp'
 
-result_name = 'lr1e-06_bs4_epochs200_seed512'   # the name of .csv file
+result_name = 'lr0.0001_bs4_epochs180_seed1133'   # the name of .csv file
 result_task = 1
 result_net = 'ResNet50'
 

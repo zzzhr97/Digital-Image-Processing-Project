@@ -25,12 +25,12 @@ class SResNet_block(nn.Module):
         return x
     
 class SResNet(nn.Module):
-    def __init__(self, num_classes=2):
+    def __init__(self, num_classes=2, inchannel=3, pretrained=False):
         super(SResNet, self).__init__()
 
         self.blocks = nn.ModuleList([
             nn.Sequential(
-                SResNet_block(3, 8),    # (3, 512, 512) -> (8, 512, 512)
+                SResNet_block(inchannel, 8),    # (3, 512, 512) -> (8, 512, 512)
                 SResNet_block(8, 8),    # (8, 512, 512) -> (8, 512, 512)
                 nn.MaxPool2d(2, 2)      # (8, 512, 512) -> (8, 256, 256)
             ),

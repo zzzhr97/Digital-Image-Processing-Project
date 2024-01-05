@@ -101,7 +101,7 @@ def transform(image):
     image = torch.from_numpy(image).permute(2, 0, 1).to(torch.float)    # (3, 512, 512)
     # ============================================
 
-    image = test_transform4(image)
+    image = test_transform5(image)
     
     # ============================================
     return image

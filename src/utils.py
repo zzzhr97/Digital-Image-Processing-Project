@@ -38,32 +38,69 @@ def load_checkpoint(net, file_name, load_path, device):
 
     print(f'\tCheckpoint loaded from {file_name}')
 
+# def visualize_results(results, best_valid_result):
+#     """visualize the results."""
+#     if list(results[-1].keys())[0] == 'best_threshold':
+#         results = results[:-1]  # remove the last element {'best_threshold': best threshold in validation set}
+#     counter = [i['epoch'] for i in results]
+#     train_losses = [i['train_score']['Loss'] for i in results]
+#     valid_losses = [i['valid_score']['Loss'] for i in results]
+#     train_avg_score = [i['train_score']['Average'] for i in results]
+#     valid_avg_score = [i['valid_score']['Average'] for i in results]
+
+#     plt.subplot(1, 2, 1)
+#     plt.plot(counter, train_losses, color='red')
+#     plt.plot(counter, valid_losses, color='green')
+#     plt.title("Loss")
+#     plt.legend(['Train', 'Validation'], loc='best')
+#     plt.xlabel('Epoch')
+#     plt.ylabel('Loss')
+
+#     plt.subplot(1, 2, 2)
+#     plt.plot(counter, train_avg_score, color='red')
+#     plt.plot(counter, valid_avg_score, color='green')
+#     plt.title("Average Score")
+#     plt.legend(['Train', 'Validation'], loc='best')
+#     plt.xlabel('Epoch')
+#     plt.ylabel('Average Score')
+
+#     plt.tight_layout()
+#     plt.savefig('./results.png')
+#     print(f'\tImage results saved to results.png')
+    
 def visualize_results(results, best_valid_result):
-    """visualize the results."""
+    """Visualize the results."""
     if list(results[-1].keys())[0] == 'best_threshold':
         results = results[:-1]  # remove the last element {'best_threshold': best threshold in validation set}
+    
     counter = [i['epoch'] for i in results]
     train_losses = [i['train_score']['Loss'] for i in results]
     valid_losses = [i['valid_score']['Loss'] for i in results]
     train_avg_score = [i['train_score']['Average'] for i in results]
     valid_avg_score = [i['valid_score']['Average'] for i in results]
 
+    # Increase figure size for better readability
+    plt.figure(figsize=(12, 6))
+
+    # Plot Loss
     plt.subplot(1, 2, 1)
-    plt.plot(counter, train_losses, color='red')
-    plt.plot(counter, valid_losses, color='green')
-    plt.title("Loss")
-    plt.legend(['Train', 'Validation'], loc='best')
+    plt.plot(counter, train_losses, color='red', label='Train')
+    plt.plot(counter, valid_losses, color='green', label='Validation')
+    plt.title("Loss", fontsize=16, fontweight='bold')  # Increase title font size and make it bold
+    plt.legend(loc='best')
     plt.xlabel('Epoch')
-    plt.ylabel('Loss')
+    plt.grid(color='gray', linestyle='--', linewidth=0.5)  # Change grid color
 
+    # Plot Average Score
     plt.subplot(1, 2, 2)
-    plt.plot(counter, train_avg_score, color='red')
-    plt.plot(counter, valid_avg_score, color='green')
-    plt.title("Average Score")
-    plt.legend(['Train', 'Validation'], loc='best')
+    plt.plot(counter, train_avg_score, color='red', label='Train')
+    plt.plot(counter, valid_avg_score, color='green', label='Validation')
+    plt.title("Average Score", fontsize=16, fontweight='bold')  # Increase title font size and make it bold
+    plt.legend(loc='best')
     plt.xlabel('Epoch')
-    plt.ylabel('Average Score')
+    plt.grid(color='gray', linestyle='--', linewidth=0.5)  # Change grid color
 
+    # Adjust layout and save the figure
     plt.tight_layout()
     plt.savefig('./results.png')
     print(f'\tImage results saved to results.png')

@@ -2,22 +2,28 @@ import os
 import torch
 from torch import nn
 
-import transform as transform
-from Net import ResNet101
-# from Net1 import *
-# from Net2 import *
-# from Net3 import *
+import transform, transform1, transform2, transform3, transform4, transform5, transform6
+import Net, Net1, Net2, Net3, Net4, Net5, Net6
 
 # voting or not
 is_vote = True
 
 # not voting
-net = ResNet101
+net = Net.ResNet101
 ckpt_path = "Net.pth"
 
+nets = []
+ckpt_paths = []
+transforms = []
+
 # voting
-nets = [ResNet101] * 4
-ckpt_paths = ["Net.pth", "Net1.pth", "Net2.pth", "Net3.pth"]
+nets = [Net1.DenseNet121, Net2.DenseNet121, Net3.ResNet101, Net4.ResNet101, Net5.ResNet101, Net6.ResNet101]
+ckpt_paths = ["Net1.pth", "Net2.pth", "Net3.pth", "Net4.pth", "Net5.pth", "Net6.pth"]
+transforms = [transform1, transform2, transform3, transform4, transform5, transform6]
+
+nets = [Net1.DenseNet121, Net2.DenseNet121, Net3.ResNet101, Net4.ResNet101]
+ckpt_paths = ["Net1.pth", "Net2.pth", "Net3.pth", "Net4.pth"]
+transforms = [transform1, transform2, transform3, transform4]
 
 num_classes = 2
 in_channel = 3
@@ -78,24 +84,25 @@ class model:
             pred_class = int(pred_class)
 
         return pred_class
+    
+    def pre_process(self, input_image, seq=-1):
+        """Pre process image"""
+        # image transform
+        if seq == -1:
+            image = transform.transform_method(method=transform_method_origin)(input_image)
+        else:
+            tr = transforms[seq]
+            image = tr.transform_method(method=transform_method_origin)(input_image)
 
-    def vote_predict(self, image):
-        """Get ultimal prediction by voting"""
-        pred_classes = []
-        for vote_net in self.models:
-            with torch.no_grad():
-                score = vote_net(image)
+        image = image.unsqueeze(0)   # (3, x, x) -> (1, 3, x, x)
+        image = image.to(self.device, torch.float)
+        return image
 
-            pred_classes.append(self.get_pred_class(score))
-
-        pred_class = max(pred_classes, key=pred_classes.count)
-        return pred_class
-
-    def single_predict(self, image):
-        """Get prediction from single model"""
+    def single_predict(self, image, seq=-1):
+        """Get prediction from a model"""
+        cur_net = self.model if seq == -1 else self.models[seq]
         with torch.no_grad():
-            score = self.model(image)
-
+            score = cur_net(image)
         return self.get_pred_class(score)
 
     def predict(self, input_image):
@@ -106,18 +113,15 @@ class model:
         :param input_image: the input image to the model.
         :return: an int value indicating the class for the input image
         """
-        # image transform
-        image = transform.transform_method(method=transform_method_origin)(input_image)
+        if not is_vote:
+            image = self.pre_process(input_image)
+            pred_class = self.single_predict(image, seq=-1)
 
-        # image dimension expansion (do not change)
-        image = image.unsqueeze(0)   # (3, x, x) -> (1, 3, x, x)
-
-        # image to device
-        image = image.to(self.device, torch.float)
-
-        if is_vote:
-            pred_class = self.vote_predict(image)
         else:
-            pred_class = self.single_predict(image)
+            pred_classes = []
+            for idx in range(len(self.models)):
+                image = self.pre_process(input_image, seq=idx)
+                pred_classes.append(self.single_predict(image, seq=idx))
+            pred_class = max(set(pred_classes), key=pred_classes.count)
 
         return pred_class
